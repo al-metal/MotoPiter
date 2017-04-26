@@ -57,6 +57,7 @@
             // 
             this.tbPassNethouse.Location = new System.Drawing.Point(112, 19);
             this.tbPassNethouse.Name = "tbPassNethouse";
+            this.tbPassNethouse.PasswordChar = '*';
             this.tbPassNethouse.Size = new System.Drawing.Size(100, 20);
             this.tbPassNethouse.TabIndex = 1;
             // 
@@ -93,6 +94,7 @@
             // 
             this.tbPassMotopiter.Location = new System.Drawing.Point(112, 19);
             this.tbPassMotopiter.Name = "tbPassMotopiter";
+            this.tbPassMotopiter.PasswordChar = '*';
             this.tbPassMotopiter.Size = new System.Drawing.Size(100, 20);
             this.tbPassMotopiter.TabIndex = 1;
             // 
@@ -104,6 +106,7 @@
             this.btnActual.TabIndex = 4;
             this.btnActual.Text = "Обработать сайт";
             this.btnActual.UseVisualStyleBackColor = true;
+            this.btnActual.Click += new System.EventHandler(this.btnActual_Click);
             // 
             // rtbMiniText
             // 
@@ -178,6 +181,7 @@
             this.Controls.Add(this.groupBox1);
             this.Name = "Form1";
             this.Text = "MotoPiter";
+            this.Load += new System.EventHandler(this.Form1_Load);
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
             this.groupBox2.ResumeLayout(false);

@@ -133,5 +133,22 @@ namespace MotoPiter
 
             MessageBox.Show("Сохранено");
         }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+            tbLoginNethouse.Text = Properties.Settings.Default.loginNethouse;
+            tbPassNethouse.Text = Properties.Settings.Default.passNethouse;
+            tbLoginMotopiter.Text = Properties.Settings.Default.loginMotopiter;
+            tbPassMotopiter.Text = Properties.Settings.Default.passMotopiter;
+        }
+
+        private void btnActual_Click(object sender, EventArgs e)
+        {
+            Properties.Settings.Default.loginNethouse = tbLoginNethouse.Text;
+            Properties.Settings.Default.passNethouse = tbPassNethouse.Text;
+            Properties.Settings.Default.loginMotopiter = tbLoginMotopiter.Text;
+            Properties.Settings.Default.passMotopiter = tbPassMotopiter.Text;
+            Properties.Settings.Default.Save();
+        }
     }
 }
