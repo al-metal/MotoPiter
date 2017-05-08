@@ -8,6 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -204,6 +205,27 @@ namespace MotoPiter
 
             #region Моторасходники
             otv = webRequest.getRequest(cookieMotoPiter, "http://www.motopiter.ru/dealer/dealer.asp");
+
+            otv = webRequest.getRequest(cookieMotoPiter, "http://www.motopiter.ru/product/6");
+
+            MatchCollection category = new Regex("(?<=<li class=\"submenu\"><a href=\"/product/6/).*?(?=</a>)").Matches(otv);
+
+            foreach(Match categoryStr in category)
+            {
+                string str = categoryStr.ToString();
+                string subCategoryName = new Regex("(?<=\">).*").Match(str).ToString();
+                string subCategoryUrl = new Regex(".*(?=\">)").Match(str).ToString();
+
+                MatchCollection subCategory = new Regex("(?<=<a class=\"nolink small\" href=\"/product/6/" + subCategoryUrl + "/).*?(?=</a>)").Matches(otv);
+
+                foreach(Match subCategoryStr in subCategory)
+                {
+                    string subStr = subCategoryStr.ToString();
+                    string subCategorySmallName = new Regex("(?<=\" title=\").*?(?=\">)").Match(subStr).ToString();
+                    string subCategorySmallUrl = new Regex(".*?(?=\" title=\")").Match(subStr).ToString();
+                    string url = "http://www.motopiter.ru/product/6/" + subCategoryUrl + "/" + subCategorySmallUrl;
+                }
+            }
 
             #endregion
 
