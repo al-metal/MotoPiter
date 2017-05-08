@@ -23,8 +23,10 @@ namespace MotoPiter
         string keywordsTextTemplate;
         string titleTextTemplate;
         string descriptionTextTemplate;
+        string otv;
 
         nethouse nethouse = new nethouse();
+        httpRequest webRequest = new httpRequest();
 
         public Form1()
         {
@@ -184,15 +186,46 @@ namespace MotoPiter
 
         private void ActualMotoPiter()
         {
-            CookieContainer cookie = nethouse.CookieNethouse(tbLoginNethouse.Text, tbPassNethouse.Text);
-            if (cookie.Count == 1)
+            CookieContainer cookieNethouse = nethouse.CookieNethouse(tbLoginNethouse.Text, tbPassNethouse.Text);
+            if (cookieNethouse.Count == 1)
             {
-                MessageBox.Show("Логин или пароль для сайта введены не верно", "Ошибка логина/пароля");
+                MessageBox.Show("Логин или пароль для сайта Nethouse введены не верно", "Ошибка логина/пароля");
+                return;
+            }
+
+            CookieContainer cookieMotoPiter = CookieMotoPiter(tbLoginMotopiter.Text, tbPassMotopiter.Text);
+            if (cookieMotoPiter.Count != 1)
+            {
+                MessageBox.Show("Логин или пароль для сайта MotoPiter введены не верно", "Ошибка логина/пароля");
                 return;
             }
 
             ControlsFormEnabledFalse();
 
+            #region Моторасходники
+            otv = webRequest.getRequest(cookieMotoPiter, "http://www.motopiter.ru/dealer/dealer.asp");
+
+            #endregion
+
+        }
+
+        private CookieContainer CookieMotoPiter(string login, string password)
+        {
+            CookieContainer cookie = new CookieContainer();
+            HttpWebRequest req = (HttpWebRequest)HttpWebRequest.Create("http://www.motopiter.ru/run");
+            req.Accept = "text/html, */*; q=0.01";
+            req.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.96 Safari/537.36";
+            req.Method = "POST";
+            req.ContentType = "application/x-www-form-urlencoded; charset=UTF-8";
+            req.CookieContainer = cookie;
+            byte[] ms = Encoding.ASCII.GetBytes("par=LogonDealer1&email=" + login + "&password=" + password);
+            req.ContentLength = ms.Length;
+            Stream stre = req.GetRequestStream();
+            stre.Write(ms, 0, ms.Length);
+            stre.Close();
+            HttpWebResponse res = (HttpWebResponse)req.GetResponse();
+
+            return cookie;
         }
 
         private void ControlsFormEnabledFalse()
