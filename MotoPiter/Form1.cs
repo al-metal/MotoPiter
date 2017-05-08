@@ -144,11 +144,20 @@ namespace MotoPiter
 
         private void btnActual_Click(object sender, EventArgs e)
         {
+            #region Сохранение паролей
             Properties.Settings.Default.loginNethouse = tbLoginNethouse.Text;
             Properties.Settings.Default.passNethouse = tbPassNethouse.Text;
             Properties.Settings.Default.loginMotopiter = tbLoginMotopiter.Text;
             Properties.Settings.Default.passMotopiter = tbPassMotopiter.Text;
             Properties.Settings.Default.Save();
+            #endregion
+
+            #region Обработка сайта
+
+
+
+            #endregion
+
         }
     }
 }
