@@ -8,6 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -15,12 +16,15 @@ namespace MotoPiter
 {
     public partial class Form1 : Form
     {
+        Thread forms;
 
         string minitextTemplate;
         string fullTextTemplate;
         string keywordsTextTemplate;
         string titleTextTemplate;
         string descriptionTextTemplate;
+
+        nethouse nethouse = new nethouse();
 
         public Form1()
         {
@@ -169,8 +173,42 @@ namespace MotoPiter
             titleTextTemplate = tbTitle.Lines[0].ToString();
             descriptionTextTemplate = tbDescription.Lines[0].ToString();
 
+            Thread tabl = new Thread(() => ActualMotoPiter());
+            forms = tabl;
+            forms.IsBackground = true;
+            forms.Start();
+
             #endregion
 
+        }
+
+        private void ActualMotoPiter()
+        {
+            CookieContainer cookie = nethouse.CookieNethouse(tbLoginNethouse.Text, tbPassNethouse.Text);
+            if (cookie.Count == 1)
+            {
+                MessageBox.Show("Логин или пароль для сайта введены не верно", "Ошибка логина/пароля");
+                return;
+            }
+
+            ControlsFormEnabledFalse();
+
+        }
+
+        private void ControlsFormEnabledFalse()
+        {
+            btnActual.Invoke(new Action(() => btnActual.Enabled = false));
+            btnImages.Invoke(new Action(() => btnImages.Enabled = false));
+            btnSaveTemplate.Invoke(new Action(() => btnSaveTemplate.Enabled = false));
+            rtbFullText.Invoke(new Action(() => rtbFullText.Enabled = false));
+            rtbMiniText.Invoke(new Action(() => rtbMiniText.Enabled = false));
+            tbDescription.Invoke(new Action(() => tbDescription.Enabled = false));
+            tbKeywords.Invoke(new Action(() => tbKeywords.Enabled = false));
+            tbTitle.Invoke(new Action(() => tbTitle.Enabled = false));
+            tbLoginNethouse.Invoke(new Action(() => tbLoginNethouse.Enabled = false));
+            tbPassNethouse.Invoke(new Action(() => tbPassNethouse.Enabled = false));
+            tbLoginMotopiter.Invoke(new Action(() => tbLoginMotopiter.Enabled = false));
+            tbPassMotopiter.Invoke(new Action(() => tbPassMotopiter.Enabled = false));
         }
 
         private string MinitextStr()
