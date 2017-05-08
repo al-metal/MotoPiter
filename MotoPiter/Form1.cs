@@ -1,10 +1,12 @@
-﻿using System;
+﻿using Bike18;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -13,6 +15,13 @@ namespace MotoPiter
 {
     public partial class Form1 : Form
     {
+
+        string minitextTemplate;
+        string fullTextTemplate;
+        string keywordsTextTemplate;
+        string titleTextTemplate;
+        string descriptionTextTemplate;
+
         public Form1()
         {
             InitializeComponent();
@@ -154,10 +163,48 @@ namespace MotoPiter
 
             #region Обработка сайта
 
-
+            minitextTemplate = MinitextStr();
+            fullTextTemplate = FulltextStr();
+            keywordsTextTemplate = tbKeywords.Lines[0].ToString();
+            titleTextTemplate = tbTitle.Lines[0].ToString();
+            descriptionTextTemplate = tbDescription.Lines[0].ToString();
 
             #endregion
 
+        }
+
+        private string MinitextStr()
+        {
+            string minitext = "";
+            for (int z = 0; rtbMiniText.Lines.Length > z; z++)
+            {
+                if (rtbMiniText.Lines[z].ToString() == "")
+                {
+                    minitext += "<p><br /></p>";
+                }
+                else
+                {
+                    minitext += "<p>" + rtbMiniText.Lines[z].ToString() + "</p>";
+                }
+            }
+            return minitext;
+        }
+
+        private string FulltextStr()
+        {
+            string fullText = "";
+            for (int z = 0; rtbFullText.Lines.Length > z; z++)
+            {
+                if (rtbFullText.Lines[z].ToString() == "")
+                {
+                    fullText += "<p><br /></p>";
+                }
+                else
+                {
+                    fullText += "<p>" + rtbFullText.Lines[z].ToString() + "</p>";
+                }
+            }
+            return fullText;
         }
     }
 }
