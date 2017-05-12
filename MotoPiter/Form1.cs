@@ -227,11 +227,27 @@ namespace MotoPiter
                     string subCategorySmallName = new Regex("(?<=\" title=\").*?(?=\">)").Match(subStr).ToString();
                     string subCategorySmallUrl = new Regex(".*?(?=\" title=\")").Match(subStr).ToString();
                     string url = "http://www.motopiter.ru/product/6/" + subCategoryUrl + "/" + subCategorySmallUrl;
+
+                    UpdateTovars(cookieMotoPiter, url);
                 }
             }
 
             #endregion
 
+        }
+
+        private void UpdateTovars(CookieContainer cookieMotoPiter, string url)
+        {
+            otv = null;
+            otv = webRequest.getRequest(cookieMotoPiter, url);
+
+            MatchCollection tovarBox = new Regex("<div class=\"box_grey\".*?</div></div></a></div>").Matches(otv);
+            foreach(Match str in tovarBox)
+            {
+                string strTovarBox = str.ToString();
+                string urlTovar = new Regex("(?<=<a href=\").*?(?=\")").Match(strTovarBox).ToString();
+                urlTovar = "http://www.motopiter.ru" + urlTovar;
+            }
         }
 
         private CookieContainer CookieMotoPiter(string login, string password)
