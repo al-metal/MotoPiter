@@ -216,6 +216,9 @@ namespace MotoPiter
                 string subCategoryName = new Regex("(?<=\">).*").Match(str).ToString();
                 string subCategoryUrl = new Regex(".*(?=\">)").Match(str).ToString();
 
+                if (subCategoryUrl == "750" || subCategoryUrl == "470" || subCategoryUrl == "40")
+                    continue;
+
                 MatchCollection subCategory = new Regex("(?<=<a class=\"nolink small\" href=\"/product/6/" + subCategoryUrl + "/).*?(?=</a>)").Matches(otv);
 
                 foreach(Match subCategoryStr in subCategory)
