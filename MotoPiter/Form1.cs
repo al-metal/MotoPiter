@@ -247,7 +247,38 @@ namespace MotoPiter
                 string strTovarBox = str.ToString();
                 string urlTovar = new Regex("(?<=<a href=\").*?(?=\")").Match(strTovarBox).ToString();
                 urlTovar = "http://www.motopiter.ru" + urlTovar;
+
+                List<string> tovarMotoPiter = GetTovarMotoPiter(cookieMotoPiter, urlTovar);
             }
+        }
+
+        private List<string> GetTovarMotoPiter(CookieContainer cookieMotoPiter, string urlTovar)
+        {
+            List<string> tovar = new List<string>();
+            otv = null;
+
+            otv = webRequest.getRequest(cookieMotoPiter, urlTovar);
+
+            string nameTovar = new Regex("(?<=<h4>).*?(?=</h4><dl)").Match(otv).ToString();
+            string panelTovar = new Regex("(?<=id=\"description\")[\\w\\W]*?(?=</div>)").Match(otv).ToString();
+            panelTovar = panelTovar.Replace("<p></p>", "");
+            string descriptionTovar = new Regex("(?<=<p>)[\\w\\W]*?(?=</p>)").Match(panelTovar).ToString();
+
+            descriptionTovar = DeleteUrlsInText(descriptionTovar);
+            
+
+            return tovar;
+        }
+
+        private string DeleteUrlsInText(string text)
+        {
+            MatchCollection urls = new Regex("<a[\\w\\W]*?</a>").Matches(text);
+            foreach (Match str in urls)
+            {
+                string s = str.ToString();
+                text = text.Replace(s, "");
+            }
+            return text;
         }
 
         private CookieContainer CookieMotoPiter(string login, string password)
