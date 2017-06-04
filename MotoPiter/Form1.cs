@@ -260,12 +260,20 @@ namespace MotoPiter
             otv = webRequest.getRequest(cookieMotoPiter, urlTovar);
 
             string nameTovar = new Regex("(?<=<h4>).*?(?=</h4><dl)").Match(otv).ToString();
+
             string panelTovar = new Regex("(?<=id=\"description\")[\\w\\W]*?(?=</div>)").Match(otv).ToString();
             panelTovar = panelTovar.Replace("<p></p>", "");
             string descriptionTovar = new Regex("(?<=<p>)[\\w\\W]*?(?=</p>)").Match(panelTovar).ToString();
-
             descriptionTovar = DeleteUrlsInText(descriptionTovar);
-            
+
+            string article = new Regex("(?<=<strong>Арт.).*?(?=</strong>)").Match(otv).ToString();
+            article = article.Trim();
+            article = "MP-" + article;
+
+            string price = new Regex("(?<=<p><small>).*(?=</small></p>)").Match(otv).ToString();
+            price = price.Replace("р:&nbsp;", "").Replace("&nbsp;р.", "");
+
+
 
             return tovar;
         }
