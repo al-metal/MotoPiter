@@ -12,6 +12,7 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using Формирование_ЧПУ;
 
 namespace MotoPiter
 {
@@ -28,6 +29,7 @@ namespace MotoPiter
 
         nethouse nethouse = new nethouse();
         httpRequest webRequest = new httpRequest();
+        CHPU chpu = new CHPU();
 
         public Form1()
         {
@@ -273,9 +275,104 @@ namespace MotoPiter
             string price = new Regex("(?<=<p><small>).*(?=</small></p>)").Match(otv).ToString();
             price = price.Replace("р:&nbsp;", "").Replace("&nbsp;р.", "");
 
+            string slug = chpu.vozvr(nameTovar);
+
+            string descriptionText = descriptionTextTemplate;
+            string titleText = titleTextTemplate;
+            string keywordsText = keywordsTextTemplate;
+
+            titleText = ReplaceSEO("title", titleText, nameTovar, article);
+            descriptionText = ReplaceSEO("description", descriptionText, nameTovar, article);
+            keywordsText = ReplaceSEO("keywords", keywordsText, nameTovar, article);
+
+
+            /* 
+
+            minitext = Replace(minitext, section2, section1, strCodePage, dblProduct, nameTovarRacerMotors, article);
+            minitext = minitext.Remove(minitext.LastIndexOf("<p>"));
+
+            fullText = Replace(fullText, section2, section1, strCodePage, dblProduct, nameTovarRacerMotors, article);
+            fullText = fullText.Remove(fullText.LastIndexOf("<p>"));
+
+            
+
+            titleText = Remove(titleText, 255);
+            descriptionText = Remove(descriptionText, 200);
+            keywordsText = Remove(keywordsText, 100);
+            slug = Remove(slug, 64);
+            
+
+
+
+
+                        titleText = Remove(titleText, 255);
+                                                    descriptionText = Remove(descriptionText, 200);
+                                                    keywordsText = Remove(keywordsText, 100);
+                                                    slug = Remove(slug, 64);
+
+
+                                                   + newProduct.Add("\"" + articlRacerMotors[m].ToString() + "\""); //артикул
+                                                   + newProduct.Add("\"" + nameTovarRacerMotors + "\"");  //название
+                                                   + newProduct.Add("\"" + priceActual + "\""); //стоимость
+
+                                                    newProduct.Add("\"" + razdel + "\""); //раздел товара
+
+
+                                                   + newProduct.Add("\"" + minitext + "\"");//краткий текст
+                                                   + newProduct.Add("\"" + fullText + "\"");//полностью текст
+                                                    newProduct.Add("\"" + titleText + "\""); //заголовок страницы
+                                                    newProduct.Add("\"" + descriptionText + "\""); //описание
+                                                    newProduct.Add("\"" + keywordsText + "\"");//ключевые слова
+                                                   + newProduct.Add("\"" + slug + "\""); //ЧПУ
+                                                    newProduct.Add("");   //рекламные метки
+
+
+                                                    files.fileWriterCSV(newProduct, "naSite");
+
+                         */
+
 
 
             return tovar;
+        }
+
+        private string ReplaceSEO(string nameSEO, string text, string nameTovar, string article)
+        {
+            text = text.Replace("НАЗВАНИЕ", nameTovar).Replace("АРТИКУЛ", article);
+
+            switch (nameSEO)
+            {
+                case "title":
+                    text = RemoveText(text, 255);
+                    break;
+                case "description":
+                    text = RemoveText(text, 200);
+                    break;
+                case "keywords":
+                    text = RemoveText(text, 100);
+                    break;
+                default:
+                    text = RemoveText(text, 100);
+                    break;
+            }
+
+            return text;
+        }
+
+        private string Discount()
+        {
+            string discount = "<p style=\"\"text-align: right;\"\"><span style=\"\"font -weight: bold; font-weight: bold;\"\"> Сделай ТРОЙНОЙ удар по нашим ценам! </span></p><p style=\"\"text-align: right;\"\"><span style=\"\"font -weight: bold; font-weight: bold;\"\"> 1. <a target=\"\"_blank\"\" href =\"\"http://bike18.ru/stock\"\"> Скидки за отзывы о товарах!</a> </span></p><p style=\"\"text-align: right;\"\"><span style=\"\"font -weight: bold; font-weight: bold;\"\"> 2. <a target=\"\"_blank\"\" href =\"\"http://bike18.ru/stock\"\"> Друзьям скидки и подарки!</a> </span></p><p style=\"\"text-align: right;\"\"><span style=\"\"font -weight: bold; font-weight: bold;\"\"> 3. <a target=\"\"_blank\"\" href =\"\"http://bike18.ru/stock\"\"> Нашли дешевле!? 110% разницы Ваши!</a></span></p>";
+            return discount;
+        }
+
+        private string RemoveText(string text, int v)
+        {
+            if (text.Length > v)
+            {
+                text = text.Remove(v);
+                text = text.Remove(text.LastIndexOf(" "));
+            }
+            return text;
         }
 
         private string DeleteUrlsInText(string text)
