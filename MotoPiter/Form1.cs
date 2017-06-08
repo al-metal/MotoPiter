@@ -285,6 +285,8 @@ namespace MotoPiter
             descriptionText = ReplaceSEO("description", descriptionText, nameTovar, article);
             keywordsText = ReplaceSEO("keywords", keywordsText, nameTovar, article);
 
+            string categoryTovar = ReturnCategoryTovar(otv);
+
 
             /* 
 
@@ -301,10 +303,7 @@ namespace MotoPiter
             keywordsText = Remove(keywordsText, 100);
             slug = Remove(slug, 64);
             
-
-
-
-
+            
                         titleText = Remove(titleText, 255);
                                                     descriptionText = Remove(descriptionText, 200);
                                                     keywordsText = Remove(keywordsText, 100);
@@ -315,14 +314,13 @@ namespace MotoPiter
                                                    + newProduct.Add("\"" + nameTovarRacerMotors + "\"");  //название
                                                    + newProduct.Add("\"" + priceActual + "\""); //стоимость
 
-                                                    newProduct.Add("\"" + razdel + "\""); //раздел товара
-
+                                                   + newProduct.Add("\"" + razdel + "\""); //раздел товара
 
                                                    + newProduct.Add("\"" + minitext + "\"");//краткий текст
                                                    + newProduct.Add("\"" + fullText + "\"");//полностью текст
-                                                    newProduct.Add("\"" + titleText + "\""); //заголовок страницы
-                                                    newProduct.Add("\"" + descriptionText + "\""); //описание
-                                                    newProduct.Add("\"" + keywordsText + "\"");//ключевые слова
+                                                   + newProduct.Add("\"" + titleText + "\""); //заголовок страницы
+                                                   + newProduct.Add("\"" + descriptionText + "\""); //описание
+                                                   + newProduct.Add("\"" + keywordsText + "\"");//ключевые слова
                                                    + newProduct.Add("\"" + slug + "\""); //ЧПУ
                                                     newProduct.Add("");   //рекламные метки
 
@@ -334,6 +332,18 @@ namespace MotoPiter
 
 
             return tovar;
+        }
+
+        private string ReturnCategoryTovar(string otv)
+        {
+            string category = "";
+
+            string categoriesStr = new Regex("(?<=breadcrumb\">).*?(?=Следующий)").Match(otv).ToString();
+            MatchCollection categories = new Regex("(?<=\">).*?(?=</a>)").Matches(categoriesStr);
+            string categoryName = categories[1].ToString();
+            category = "Запчасти и расходники => Расходники для японских, европейских, американских мотоциклов => " + categoryName;
+
+            return category;
         }
 
         private string ReplaceSEO(string nameSEO, string text, string nameTovar, string article)
