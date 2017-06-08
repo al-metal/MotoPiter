@@ -1,4 +1,5 @@
 ﻿using Bike18;
+using RacerMotors;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -26,10 +27,15 @@ namespace MotoPiter
         string titleTextTemplate;
         string descriptionTextTemplate;
         string otv;
+        string boldOpen = "<span style=\"\"font-weight: bold; font-weight: bold; \"\">";
+        string boldClose = "</span>";
+
+        List<string> newProduct = new List<string>();
 
         nethouse nethouse = new nethouse();
         httpRequest webRequest = new httpRequest();
         CHPU chpu = new CHPU();
+        FileEdit files = new FileEdit();
 
         public Form1()
         {
@@ -202,7 +208,8 @@ namespace MotoPiter
                 MessageBox.Show("Логин или пароль для сайта MotoPiter введены не верно", "Ошибка логина/пароля");
                 return;
             }
-
+            File.Delete("naSite.csv");
+            newProduct = newList();
             ControlsFormEnabledFalse();
 
             #region Моторасходники
@@ -230,7 +237,7 @@ namespace MotoPiter
                     string subCategorySmallUrl = new Regex(".*?(?=\" title=\")").Match(subStr).ToString();
                     string url = "http://www.motopiter.ru/product/6/" + subCategoryUrl + "/" + subCategorySmallUrl;
 
-                    UpdateTovars(cookieMotoPiter, url);
+                    UpdateTovars(cookieNethouse, cookieMotoPiter, url);
                 }
             }
 
@@ -238,7 +245,7 @@ namespace MotoPiter
 
         }
 
-        private void UpdateTovars(CookieContainer cookieMotoPiter, string url)
+        private void UpdateTovars(CookieContainer cookieNethouse, CookieContainer cookieMotoPiter, string url)
         {
             otv = null;
             otv = webRequest.getRequest(cookieMotoPiter, url);
@@ -251,7 +258,95 @@ namespace MotoPiter
                 urlTovar = "http://www.motopiter.ru" + urlTovar;
 
                 List<string> tovarMotoPiter = GetTovarMotoPiter(cookieMotoPiter, urlTovar);
+
+                string resultSearch = SearchInBike18(tovarMotoPiter);
+                if(resultSearch == null)
+                {
+                    WriteTovarInCSV(tovarMotoPiter);
+                }
+                else
+                {
+                    //обновить цену
+                }
             }
+        }
+
+        private List<string> newList()
+        {
+            List<string> newProduct = new List<string>();
+            newProduct.Add("id");                                                                               //id
+            newProduct.Add("Артикул *");                                                 //артикул
+            newProduct.Add("Название товара *");                                          //название
+            newProduct.Add("Стоимость товара *");                                    //стоимость
+            newProduct.Add("Стоимость со скидкой");                                       //со скидкой
+            newProduct.Add("Раздел товара *");                                         //раздел товара
+            newProduct.Add("Товар в наличии *");                                                    //в наличии
+            newProduct.Add("Поставка под заказ *");                                                 //поставка
+            newProduct.Add("Срок поставки (дни) *");                                           //срок поставки
+            newProduct.Add("Краткий текст");                                 //краткий текст
+            newProduct.Add("Текст полностью");                                          //полностью текст
+            newProduct.Add("Заголовок страницы (title)");                               //заголовок страницы
+            newProduct.Add("Описание страницы (description)");                                 //описание
+            newProduct.Add("Ключевые слова страницы (keywords)");                                 //ключевые слова
+            newProduct.Add("ЧПУ страницы (slug)");                                   //ЧПУ
+            newProduct.Add("С этим товаром покупают");                              //с этим товаром покупают
+            newProduct.Add("Рекламные метки");
+            newProduct.Add("Показывать на сайте *");                                           //показывать
+            newProduct.Add("Удалить *");                                    //удалить
+            files.fileWriterCSV(newProduct, "naSite");
+            return newProduct;
+        }
+
+        private void WriteTovarInCSV(List<string> tovarMotoPiter)
+        {
+            string nameTovar = tovarMotoPiter[0].ToString();
+            string article = tovarMotoPiter[1].ToString();
+            string price = tovarMotoPiter[2].ToString();
+            string slug = tovarMotoPiter[3].ToString();
+            string descriptionText = tovarMotoPiter[4].ToString();
+            string titleText = tovarMotoPiter[5].ToString();
+            string keywordsText = tovarMotoPiter[6].ToString();
+            string categoryTovar = tovarMotoPiter[7].ToString();
+            string minitext = tovarMotoPiter[8].ToString();
+            string fullText = tovarMotoPiter[9].ToString();
+
+
+            newProduct = new List<string>();
+            newProduct.Add(""); //id
+            newProduct.Add("\"" + article + "\""); //артикул
+            newProduct.Add("\"" + nameTovar + "\"");  //название
+            newProduct.Add("\"" + price + "\""); //стоимость
+            newProduct.Add("\"" + "" + "\""); //со скидкой
+            newProduct.Add("\"" + categoryTovar + "\""); //раздел товара
+            newProduct.Add("\"" + "100" + "\""); //в наличии
+            newProduct.Add("\"" + "0" + "\"");//поставка
+            newProduct.Add("\"" + "1" + "\"");//срок поставки
+            newProduct.Add("\"" + minitext + "\"");//краткий текст
+            newProduct.Add("\"" + fullText + "\"");//полностью текст
+            newProduct.Add("\"" + titleText + "\""); //заголовок страницы
+            newProduct.Add("\"" + descriptionText + "\""); //описание
+            newProduct.Add("\"" + keywordsText + "\"");//ключевые слова
+            newProduct.Add("\"" + slug + "\""); //ЧПУ
+            newProduct.Add(""); //с этим товаром покупают
+            newProduct.Add("");   //рекламные метки
+            newProduct.Add("\"" + "1" + "\"");  //показывать
+            newProduct.Add("\"" + "0" + "\""); //удалить
+
+            files.fileWriterCSV(newProduct, "naSite");
+        }
+
+        private string SearchInBike18(List<string> tovarMotoPiter)
+        {
+            string urlTovar = "";
+
+            string nameTovar = tovarMotoPiter[0].ToString();
+            string c = tovarMotoPiter[1].ToString();
+
+            urlTovar = nethouse.searchTovar(nameTovar, nameTovar);
+            if (urlTovar == null)
+                urlTovar = nethouse.searchTovar(nameTovar, nameTovar);
+
+            return urlTovar;
         }
 
         private List<string> GetTovarMotoPiter(CookieContainer cookieMotoPiter, string urlTovar)
@@ -287,51 +382,37 @@ namespace MotoPiter
 
             string categoryTovar = ReturnCategoryTovar(otv);
 
+            string minitext = minitextTemplate;
+            string fullText = fullTextTemplate;
 
-            /* 
-
-            minitext = Replace(minitext, section2, section1, strCodePage, dblProduct, nameTovarRacerMotors, article);
+            minitext = Replace(minitext, nameTovar, article);
             minitext = minitext.Remove(minitext.LastIndexOf("<p>"));
 
-            fullText = Replace(fullText, section2, section1, strCodePage, dblProduct, nameTovarRacerMotors, article);
+            fullText = Replace(fullText, nameTovar, article);
             fullText = fullText.Remove(fullText.LastIndexOf("<p>"));
 
-            
+            fullText = "<p>" + descriptionTovar + "</p><p></p>" + fullText;
 
-            titleText = Remove(titleText, 255);
-            descriptionText = Remove(descriptionText, 200);
-            keywordsText = Remove(keywordsText, 100);
-            slug = Remove(slug, 64);
-            
-            
-                        titleText = Remove(titleText, 255);
-                                                    descriptionText = Remove(descriptionText, 200);
-                                                    keywordsText = Remove(keywordsText, 100);
-                                                    slug = Remove(slug, 64);
-
-
-                                                   + newProduct.Add("\"" + articlRacerMotors[m].ToString() + "\""); //артикул
-                                                   + newProduct.Add("\"" + nameTovarRacerMotors + "\"");  //название
-                                                   + newProduct.Add("\"" + priceActual + "\""); //стоимость
-
-                                                   + newProduct.Add("\"" + razdel + "\""); //раздел товара
-
-                                                   + newProduct.Add("\"" + minitext + "\"");//краткий текст
-                                                   + newProduct.Add("\"" + fullText + "\"");//полностью текст
-                                                   + newProduct.Add("\"" + titleText + "\""); //заголовок страницы
-                                                   + newProduct.Add("\"" + descriptionText + "\""); //описание
-                                                   + newProduct.Add("\"" + keywordsText + "\"");//ключевые слова
-                                                   + newProduct.Add("\"" + slug + "\""); //ЧПУ
-                                                    newProduct.Add("");   //рекламные метки
-
-
-                                                    files.fileWriterCSV(newProduct, "naSite");
-
-                         */
-
-
+            tovar.Add(nameTovar);
+            tovar.Add(article);
+            tovar.Add(price);
+            tovar.Add(slug);
+            tovar.Add(descriptionText);
+            tovar.Add(titleText);
+            tovar.Add(keywordsText);
+            tovar.Add(categoryTovar);
+            tovar.Add(minitext);
+            tovar.Add(fullText);
 
             return tovar;
+        }
+
+        private string Replace(string text, string nameTovar, string article)
+        {
+            string discount = Discount();
+            string nameText = boldOpen + nameTovar + boldClose;
+            text = text.Replace("СКИДКА", discount).Replace("НАЗВАНИЕ", nameText).Replace("АРТИКУЛ", article).Replace("<p><br /></p><p><br /></p><p><br /></p><p>", "<p><br /></p>");
+            return text;
         }
 
         private string ReturnCategoryTovar(string otv)
