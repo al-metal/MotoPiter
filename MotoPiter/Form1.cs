@@ -36,6 +36,7 @@ namespace MotoPiter
         httpRequest webRequest = new httpRequest();
         CHPU chpu = new CHPU();
         FileEdit files = new FileEdit();
+        WebClient webClient = new WebClient();
 
         public Form1()
         {
@@ -390,8 +391,9 @@ namespace MotoPiter
 
             fullText = Replace(fullText, nameTovar, article);
             fullText = fullText.Remove(fullText.LastIndexOf("<p>"));
-
             fullText = "<p>" + descriptionTovar + "</p><p></p>" + fullText;
+
+            DownloadImages(otv, article);
 
             tovar.Add(nameTovar);
             tovar.Add(article);
@@ -405,6 +407,24 @@ namespace MotoPiter
             tovar.Add(fullText);
 
             return tovar;
+        }
+
+        private void DownloadImages(string otv, string article)
+        {
+            string urlImage = new Regex("(?<=<img class=\"img-responsive\" src=\").*?(?=\")").Match(otv).ToString();
+
+            if(!File.Exists("pic\\" + article + ".jpg"))
+            {
+                try
+                {
+                    webClient.DownloadFile("http://www.motopiter.ru" + urlImage, "Pic\\" + article + ".jpg");
+                }
+                catch
+                {
+
+                }
+            }
+
         }
 
         private string Replace(string text, string nameTovar, string article)
