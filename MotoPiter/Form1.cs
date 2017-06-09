@@ -240,7 +240,7 @@ namespace MotoPiter
 
                     UpdateTovars(cookieNethouse, cookieMotoPiter, url);
 
-                    UploadCSVInNethoise(cookieNethouse);
+                    //UploadCSVInNethoise(cookieNethouse);
                 }
             }
 
@@ -266,7 +266,7 @@ namespace MotoPiter
                 string strTovarBox = str.ToString();
                 string urlTovar = new Regex("(?<=<a href=\").*?(?=\")").Match(strTovarBox).ToString();
                 urlTovar = "http://www.motopiter.ru" + urlTovar;
-                urlTovar = "http://www.motopiter.ru/20940064";
+                //urlTovar = "http://www.motopiter.ru/20940064";
 
                 List<string> tovarMotoPiter = GetTovarMotoPiter(cookieMotoPiter, urlTovar);
 
@@ -321,10 +321,10 @@ namespace MotoPiter
 
             string[] articles = tovarMotoPiter[1].ToString().Split(';');
             string[] prices = tovarMotoPiter[2].ToString().Split(';');
-            string[] slugs = tovarMotoPiter[3].ToString().Split(';');            
+            string[] slugs = tovarMotoPiter[3].ToString().Split(';');
             string[] miniDescriptions = tovarMotoPiter[10].ToString().Split(';');
 
-            if(articles.Length == prices.Length && prices.Length == slugs.Length && slugs.Length == miniDescriptions.Length)
+            if (articles.Length == prices.Length && prices.Length == slugs.Length && slugs.Length == miniDescriptions.Length)
             {
                 for (int i = 0; articles.Length > i; i++)
                 {
@@ -377,21 +377,21 @@ namespace MotoPiter
             string[] article = articles.Split(';');
 
             urlTovar = nethouse.searchTovar(nameTovar, nameTovar);
-            
-            foreach(string str in article)
+
+            foreach (string str in article)
             {
                 string search = "";
                 if (urlTovar == null)
                 {
                     search = nethouse.searchTovar(nameTovar, str);
-                    if(search != null)
+                    if (search != null)
                     {
                         urlTovar = urlTovar + ";" + search;
                     }
                 }
-                    
+
             }
-            
+
             return urlTovar;
         }
 
@@ -415,7 +415,10 @@ namespace MotoPiter
             {
                 string s = str.ToString();
                 s = s.Trim();
-                minDescription = minDescription + ";" + s;
+                if (miniDescription.Count == 1)
+                    minDescription = s;
+                else
+                    minDescription = minDescription + ";" + s;
             }
 
             string article = "";
@@ -425,7 +428,10 @@ namespace MotoPiter
                 string s = articles[i].ToString();
                 s = s.Trim();
                 s = s.Replace("/", "_").Replace("-", "_").Replace(" ", "_");
-                article = article + ";MP_" + s + "_" + i;
+                if (articles.Count == 1)
+                    article = "MP_" + s;
+                else
+                    article = article + ";MP_" + s + "_" + i;
             }
 
             string price = "";
@@ -433,15 +439,21 @@ namespace MotoPiter
             foreach (Match str in prices)
             {
                 string s = str.ToString();
-                s = s.Replace("р:&nbsp;", "").Replace("&nbsp;р.", "");
+                s = s.Replace("р:&nbsp;", "").Replace("&nbsp;р.", "").Replace(" ", "");
                 s = s.Trim();
-                price = price + ";" + s;
+                if (prices.Count == 1)
+                    price = s;
+                else
+                    price = price + ";" + s;
             }
 
             string slug = "";
             for (int i = 0; prices.Count > i; i++)
             {
-                slug = slug + ";" + chpu.vozvr(nameTovar) + "-" + i;
+                if (prices.Count == 1)
+                    slug = chpu.vozvr(nameTovar);
+                else
+                    slug = slug + ";" + chpu.vozvr(nameTovar) + "-" + i;
             }
 
             string descriptionText = descriptionTextTemplate;
