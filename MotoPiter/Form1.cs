@@ -351,12 +351,25 @@ namespace MotoPiter
             string urlTovar = "";
 
             string nameTovar = tovarMotoPiter[0].ToString();
-            string c = tovarMotoPiter[1].ToString();
+            string articles = tovarMotoPiter[1].ToString();
+            string[] article = articles.Split(';');
 
             urlTovar = nethouse.searchTovar(nameTovar, nameTovar);
-            if (urlTovar == null)
-                urlTovar = nethouse.searchTovar(nameTovar, nameTovar);
-
+            
+            foreach(string str in article)
+            {
+                string search = "";
+                if (urlTovar == null)
+                {
+                    search = nethouse.searchTovar(nameTovar, str);
+                    if(search != null)
+                    {
+                        urlTovar = urlTovar + ";" + search;
+                    }
+                }
+                    
+            }
+            
             return urlTovar;
         }
 
@@ -441,6 +454,7 @@ namespace MotoPiter
             tovar.Add(categoryTovar);
             tovar.Add(miniText);
             tovar.Add(fullText);
+            tovar.Add(minDescription);
 
             return tovar;
         }
