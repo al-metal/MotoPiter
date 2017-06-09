@@ -266,6 +266,7 @@ namespace MotoPiter
                 string strTovarBox = str.ToString();
                 string urlTovar = new Regex("(?<=<a href=\").*?(?=\")").Match(strTovarBox).ToString();
                 urlTovar = "http://www.motopiter.ru" + urlTovar;
+                urlTovar = "http://www.motopiter.ru/20940064";
 
                 List<string> tovarMotoPiter = GetTovarMotoPiter(cookieMotoPiter, urlTovar);
 
@@ -373,30 +374,56 @@ namespace MotoPiter
             string descriptionTovar = new Regex("(?<=<p>)[\\w\\W]*?(?=</p>)").Match(panelTovar).ToString();
             descriptionTovar = DeleteUrlsInText(descriptionTovar);
 
-            string article = new Regex("(?<=<strong>Арт.).*?(?=</strong>)").Match(otv).ToString();
-            article = article.Trim();
-            article = "MP-" + article;
+            string minDescription = "";
+            MatchCollection miniDescription = new Regex("(?<=data-TextArt=\").*?(?=\")").Matches(otv);
+            foreach (Match str in miniDescription)
+            {
+                string s = str.ToString();
+                s = s.Trim();
+                minDescription = minDescription + ";" + s;
+            }
 
-            string price = new Regex("(?<=<p><small>).*(?=</small></p>)").Match(otv).ToString();
-            price = price.Replace("р:&nbsp;", "").Replace("&nbsp;р.", "");
+            string article = "";
+            MatchCollection articles = new Regex("(?<=<strong>Арт.).*?(?=</strong>)").Matches(otv);
+            foreach(Match str in articles)
+            {
+                string s = str.ToString();
+                s = s.Trim();
+                s = s.Replace("/", "_").Replace("-", "_").Replace(" ", "_");
+                article = article + ";MP_" + s;
+            }
+            
+            string price = "";
+            MatchCollection prices = new Regex("(?<=<p><small>).*(?=</small></p>)").Matches(otv);
+            foreach (Match str in prices)
+            {
+                string s = str.ToString();
+                s = s.Replace("р:&nbsp;", "").Replace("&nbsp;р.", "");
+                s = s.Trim();
+                price = price + ";" + s;
+            }
 
-            string slug = chpu.vozvr(nameTovar);
+            string slug = "";
+            for (int i = 0; prices.Count > i; i++)
+            {
+                slug = slug + ";" + chpu.vozvr(nameTovar) + "-" + i;
+            }
 
             string descriptionText = descriptionTextTemplate;
             string titleText = titleTextTemplate;
             string keywordsText = keywordsTextTemplate;
 
-            titleText = ReplaceSEO("title", titleText, nameTovar, article);
+            titleText = ReplaceSEO("title", titleText, nameTovar, article.Replace(";", " "));
             descriptionText = ReplaceSEO("description", descriptionText, nameTovar, article);
             keywordsText = ReplaceSEO("keywords", keywordsText, nameTovar, article);
 
             string categoryTovar = ReturnCategoryTovar(otv);
 
-            string minitext = minitextTemplate;
+            string miniText = minitextTemplate;
             string fullText = fullTextTemplate;
 
-            minitext = Replace(minitext, nameTovar, article);
-            minitext = minitext.Remove(minitext.LastIndexOf("<p>"));
+            miniText = Replace(miniText, nameTovar, article);
+            miniText = miniText.Remove(miniText.LastIndexOf("<p>"));
 
             fullText = Replace(fullText, nameTovar, article);
             fullText = fullText.Remove(fullText.LastIndexOf("<p>"));
@@ -412,7 +439,7 @@ namespace MotoPiter
             tovar.Add(titleText);
             tovar.Add(keywordsText);
             tovar.Add(categoryTovar);
-            tovar.Add(minitext);
+            tovar.Add(miniText);
             tovar.Add(fullText);
 
             return tovar;
