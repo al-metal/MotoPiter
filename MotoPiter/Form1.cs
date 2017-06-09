@@ -311,39 +311,61 @@ namespace MotoPiter
         private void WriteTovarInCSV(List<string> tovarMotoPiter)
         {
             string nameTovar = tovarMotoPiter[0].ToString();
-            string article = tovarMotoPiter[1].ToString();
-            string price = tovarMotoPiter[2].ToString();
-            string slug = tovarMotoPiter[3].ToString();
+            string fullText = tovarMotoPiter[9].ToString();
+            string minitextTemplate = tovarMotoPiter[8].ToString();
+            string categoryTovar = tovarMotoPiter[7].ToString();
             string descriptionText = tovarMotoPiter[4].ToString();
             string titleText = tovarMotoPiter[5].ToString();
             string keywordsText = tovarMotoPiter[6].ToString();
-            string categoryTovar = tovarMotoPiter[7].ToString();
-            string minitext = tovarMotoPiter[8].ToString();
-            string fullText = tovarMotoPiter[9].ToString();
 
 
-            newProduct = new List<string>();
-            newProduct.Add(""); //id
-            newProduct.Add("\"" + article + "\""); //артикул
-            newProduct.Add("\"" + nameTovar + "\"");  //название
-            newProduct.Add("\"" + price + "\""); //стоимость
-            newProduct.Add("\"" + "" + "\""); //со скидкой
-            newProduct.Add("\"" + categoryTovar + "\""); //раздел товара
-            newProduct.Add("\"" + "100" + "\""); //в наличии
-            newProduct.Add("\"" + "0" + "\"");//поставка
-            newProduct.Add("\"" + "1" + "\"");//срок поставки
-            newProduct.Add("\"" + minitext + "\"");//краткий текст
-            newProduct.Add("\"" + fullText + "\"");//полностью текст
-            newProduct.Add("\"" + titleText + "\""); //заголовок страницы
-            newProduct.Add("\"" + descriptionText + "\""); //описание
-            newProduct.Add("\"" + keywordsText + "\"");//ключевые слова
-            newProduct.Add("\"" + slug + "\""); //ЧПУ
-            newProduct.Add(""); //с этим товаром покупают
-            newProduct.Add("");   //рекламные метки
-            newProduct.Add("\"" + "1" + "\"");  //показывать
-            newProduct.Add("\"" + "0" + "\""); //удалить
+            string[] articles = tovarMotoPiter[1].ToString().Split(';');
+            string[] prices = tovarMotoPiter[2].ToString().Split(';');
+            string[] slugs = tovarMotoPiter[3].ToString().Split(';');            
+            string[] miniDescriptions = tovarMotoPiter[10].ToString().Split(';');
 
-            files.fileWriterCSV(newProduct, "naSite");
+            if(articles.Length == prices.Length && prices.Length == slugs.Length && slugs.Length == miniDescriptions.Length)
+            {
+                for (int i = 0; articles.Length > i; i++)
+                {
+                    string article = articles[i];
+                    string price = prices[i];
+                    string minitext = miniDescriptions[i];
+                    string slug = slugs[i];
+
+                    if (article == "")
+                        continue;
+
+                    minitext = "<p>" + minitext + "</p>" + minitextTemplate;
+
+                    newProduct = new List<string>();
+                    newProduct.Add(""); //id
+                    newProduct.Add("\"" + article + "\""); //артикул
+                    newProduct.Add("\"" + nameTovar + "\"");  //название
+                    newProduct.Add("\"" + price + "\""); //стоимость
+                    newProduct.Add("\"" + "" + "\""); //со скидкой
+                    newProduct.Add("\"" + categoryTovar + "\""); //раздел товара
+                    newProduct.Add("\"" + "100" + "\""); //в наличии
+                    newProduct.Add("\"" + "0" + "\"");//поставка
+                    newProduct.Add("\"" + "1" + "\"");//срок поставки
+                    newProduct.Add("\"" + minitext + "\"");//краткий текст
+                    newProduct.Add("\"" + fullText + "\"");//полностью текст
+                    newProduct.Add("\"" + titleText + "\""); //заголовок страницы
+                    newProduct.Add("\"" + descriptionText + "\""); //описание
+                    newProduct.Add("\"" + keywordsText + "\"");//ключевые слова
+                    newProduct.Add("\"" + slug + "\""); //ЧПУ
+                    newProduct.Add(""); //с этим товаром покупают
+                    newProduct.Add("");   //рекламные метки
+                    newProduct.Add("\"" + "1" + "\"");  //показывать
+                    newProduct.Add("\"" + "0" + "\""); //удалить
+
+                    files.fileWriterCSV(newProduct, "naSite");
+                }
+            }
+            else
+            {
+
+            }
         }
 
         private string SearchInBike18(List<string> tovarMotoPiter)
