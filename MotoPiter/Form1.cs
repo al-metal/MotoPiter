@@ -266,7 +266,7 @@ namespace MotoPiter
                 string strTovarBox = str.ToString();
                 string urlTovar = new Regex("(?<=<a href=\").*?(?=\")").Match(strTovarBox).ToString();
                 urlTovar = "http://www.motopiter.ru" + urlTovar;
-                //urlTovar = "http://www.motopiter.ru/20940064";
+                //urlTovar = "http://www.motopiter.ru/20935235/A/HH62-120";
 
                 List<string> tovarMotoPiter = GetTovarMotoPiter(cookieMotoPiter, urlTovar);
 
@@ -529,7 +529,7 @@ namespace MotoPiter
         {
             string category = "";
 
-            string categoriesStr = new Regex("(?<=breadcrumb\">).*?(?=Следующий)").Match(otv).ToString();
+            string categoriesStr = new Regex("(?<=breadcrumb).*?(?=<ul class=\"pager\">)").Match(otv).ToString();
             MatchCollection categories = new Regex("(?<=\">).*?(?=</a>)").Matches(categoriesStr);
             string categoryName = categories[1].ToString();
             category = "Запчасти и расходники => Расходники для японских, европейских, американских мотоциклов => " + categoryName;
