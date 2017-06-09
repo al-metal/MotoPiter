@@ -220,7 +220,7 @@ namespace MotoPiter
 
             MatchCollection category = new Regex("(?<=<li class=\"submenu\"><a href=\"/product/6/).*?(?=</a>)").Matches(otv);
 
-            foreach(Match categoryStr in category)
+            foreach (Match categoryStr in category)
             {
                 string str = categoryStr.ToString();
                 string subCategoryName = new Regex("(?<=\">).*").Match(str).ToString();
@@ -231,7 +231,7 @@ namespace MotoPiter
 
                 MatchCollection subCategory = new Regex("(?<=<a class=\"nolink small\" href=\"/product/6/" + subCategoryUrl + "/).*?(?=</a>)").Matches(otv);
 
-                foreach(Match subCategoryStr in subCategory)
+                foreach (Match subCategoryStr in subCategory)
                 {
                     string subStr = subCategoryStr.ToString();
                     string subCategorySmallName = new Regex("(?<=\" title=\").*?(?=\">)").Match(subStr).ToString();
@@ -261,7 +261,7 @@ namespace MotoPiter
             otv = webRequest.getRequest(cookieMotoPiter, url);
 
             MatchCollection tovarBox = new Regex("<div class=\"box_grey\".*?</div></div></a></div>").Matches(otv);
-            foreach(Match str in tovarBox)
+            foreach (Match str in tovarBox)
             {
                 string strTovarBox = str.ToString();
                 string urlTovar = new Regex("(?<=<a href=\").*?(?=\")").Match(strTovarBox).ToString();
@@ -271,7 +271,7 @@ namespace MotoPiter
                 List<string> tovarMotoPiter = GetTovarMotoPiter(cookieMotoPiter, urlTovar);
 
                 string resultSearch = SearchInBike18(tovarMotoPiter);
-                if(resultSearch == null)
+                if (resultSearch == null)
                 {
                     WriteTovarInCSV(tovarMotoPiter);
                 }
@@ -385,14 +385,14 @@ namespace MotoPiter
 
             string article = "";
             MatchCollection articles = new Regex("(?<=<strong>Арт.).*?(?=</strong>)").Matches(otv);
-            foreach(Match str in articles)
+            for (int i = 0; articles.Count > i; i++)
             {
-                string s = str.ToString();
+                string s = articles[i].ToString();
                 s = s.Trim();
                 s = s.Replace("/", "_").Replace("-", "_").Replace(" ", "_");
-                article = article + ";MP_" + s;
+                article = article + ";MP_" + s + "_" + i;
             }
-            
+
             string price = "";
             MatchCollection prices = new Regex("(?<=<p><small>).*(?=</small></p>)").Matches(otv);
             foreach (Match str in prices)
@@ -449,18 +449,24 @@ namespace MotoPiter
         {
             string urlImage = new Regex("(?<=<img class=\"img-responsive\" src=\").*?(?=\")").Match(otv).ToString();
 
-            if(!File.Exists("pic\\" + article + ".jpg"))
+            string[] articles = article.Split(';');
+            articles = article.Split(';');
+            foreach (string str in articles)
             {
-                try
+                if (str == "")
+                    continue;
+                if (!File.Exists("pic\\" + str + ".jpg"))
                 {
-                    webClient.DownloadFile("http://www.motopiter.ru" + urlImage, "Pic\\" + article + ".jpg");
-                }
-                catch
-                {
+                    try
+                    {
+                        webClient.DownloadFile("http://www.motopiter.ru" + urlImage, "Pic\\" + str + ".jpg");
+                    }
+                    catch
+                    {
 
+                    }
                 }
             }
-
         }
 
         private string Replace(string text, string nameTovar, string article)
