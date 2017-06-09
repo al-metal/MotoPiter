@@ -239,11 +239,20 @@ namespace MotoPiter
                     string url = "http://www.motopiter.ru/product/6/" + subCategoryUrl + "/" + subCategorySmallUrl;
 
                     UpdateTovars(cookieNethouse, cookieMotoPiter, url);
+
+                    UploadCSVInNethoise(cookieNethouse);
                 }
             }
 
             #endregion
 
+        }
+
+        private void UploadCSVInNethoise(CookieContainer cookieNethouse)
+        {
+            string[] naSite1 = File.ReadAllLines("naSite.csv", Encoding.GetEncoding(1251));
+            if (naSite1.Length > 1)
+                nethouse.UploadCSVNethouse(cookieNethouse, "naSite.csv");
         }
 
         private void UpdateTovars(CookieContainer cookieNethouse, CookieContainer cookieMotoPiter, string url)
