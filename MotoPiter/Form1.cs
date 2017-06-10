@@ -29,6 +29,8 @@ namespace MotoPiter
         string otv;
         string boldOpen = "<span style=\"\"font-weight: bold; font-weight: bold; \"\">";
         string boldClose = "</span>";
+        string upCategoryRashodnik = "6";
+        string upCategoryZapchast = "3";
 
         List<string> newProduct = new List<string>();
 
@@ -238,10 +240,9 @@ namespace MotoPiter
                     string subCategorySmallUrl = new Regex(".*?(?=\" title=\")").Match(subStr).ToString();
                     string url = "http://www.motopiter.ru/product/6/" + subCategoryUrl + "/" + subCategorySmallUrl;
 
-                    UpdateTovars(cookieNethouse, cookieMotoPiter, url);
-
-                    //UploadCSVInNethoise(cookieNethouse);
+                    UpdateTovars(cookieNethouse, cookieMotoPiter, url, subCategoryUrl, subCategorySmallUrl);
                 }
+                UploadCSVInNethoise(cookieNethouse);
             }
 
             #endregion
@@ -255,31 +256,45 @@ namespace MotoPiter
                 nethouse.UploadCSVNethouse(cookieNethouse, "naSite.csv");
         }
 
-        private void UpdateTovars(CookieContainer cookieNethouse, CookieContainer cookieMotoPiter, string url)
+        private void UpdateTovars(CookieContainer cookieNethouse, CookieContainer cookieMotoPiter, string url, string group, string smallGroup)
         {
             otv = null;
             otv = webRequest.getRequest(cookieMotoPiter, url);
-
-            MatchCollection tovarBox = new Regex("<div class=\"box_grey\".*?</div></div></a></div>").Matches(otv);
-            foreach (Match str in tovarBox)
+            string countPage = new Regex("(?<=Показана страница ).*?(?=</font>)").Match(otv).ToString();
+            countPage = new Regex("(?<=1 из ).*?(?=])").Match(countPage).ToString();
+            int allPagesTovar = Convert.ToInt32(countPage);
+            int pages = 0;
+            do
             {
-                string strTovarBox = str.ToString();
-                string urlTovar = new Regex("(?<=<a href=\").*?(?=\")").Match(strTovarBox).ToString();
-                urlTovar = "http://www.motopiter.ru" + urlTovar;
-                //urlTovar = "http://www.motopiter.ru/20935235/A/HH62-120";
-
-                List<string> tovarMotoPiter = GetTovarMotoPiter(cookieMotoPiter, urlTovar);
-
-                string resultSearch = SearchInBike18(tovarMotoPiter);
-                if (resultSearch == null)
+                pages++;
+                if(pages != 1)
                 {
-                    WriteTovarInCSV(tovarMotoPiter);
+                    string stringQuery = "GGroup=" + upCategoryRashodnik + "&SGroup=" + group + "&wgr=" + smallGroup + "&contentID=Short&new_sort=Price&new_step=&PageNo=" + pages + "&KShow=0&firma=0&transp=0";
+                    otv = webRequest.getRequest(cookieMotoPiter, url, stringQuery); // сделать запрос
                 }
-                else
+
+                MatchCollection tovarBox = new Regex("(?<=<div class=\"box_grey\")[\\w\\W]*?(?=</div></div></a></div>)").Matches(otv);
+                foreach (Match str in tovarBox)
                 {
-                    //обновить цену
+                    string strTovarBox = str.ToString();
+                    string urlTovar = new Regex("(?<=<a href=\").*?(?=\")").Match(strTovarBox).ToString();
+                    urlTovar = "http://www.motopiter.ru" + urlTovar;
+                    //urlTovar = "http://www.motopiter.ru/20935235/A/HH62-120";
+
+                    List<string> tovarMotoPiter = GetTovarMotoPiter(cookieMotoPiter, urlTovar);
+
+                    string resultSearch = SearchInBike18(tovarMotoPiter);
+                    if (resultSearch == null)
+                    {
+                        WriteTovarInCSV(tovarMotoPiter);
+                    }
+                    else
+                    {
+                        //обновить цену
+                    }
                 }
-            }
+
+            } while (pages < allPagesTovar);
         }
 
         private List<string> newList()

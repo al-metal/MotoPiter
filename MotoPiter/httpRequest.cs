@@ -56,6 +56,26 @@ namespace Bike18
             return otv;
         }
 
+        public string getRequest(CookieContainer cookie, string url, string stringQuery)
+        {
+            HttpWebRequest req = (HttpWebRequest)HttpWebRequest.Create(url);
+            req.Accept = "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8";
+            req.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36";
+            req.Method = "POST";
+            req.ContentType = "application/x-www-form-urlencoded";
+            req.CookieContainer = cookie;
+            byte[] ms1 = Encoding.ASCII.GetBytes(stringQuery);
+            req.ContentLength = ms1.Length;
+            Stream stre1 = req.GetRequestStream();
+            stre1.Write(ms1, 0, ms1.Length);
+            stre1.Close();
+            HttpWebResponse resimg = (HttpWebResponse)req.GetResponse();
+            StreamReader ressrImg = new StreamReader(resimg.GetResponseStream());
+            string otv = ressrImg.ReadToEnd();
+            resimg.Close();
+            return otv;
+        }
+
         public CookieContainer webCookie(string url)
         {
             CookieContainer cooc = new CookieContainer();
