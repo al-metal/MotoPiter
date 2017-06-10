@@ -262,6 +262,8 @@ namespace MotoPiter
             otv = webRequest.getRequest(cookieMotoPiter, url);
             string countPage = new Regex("(?<=Показана страница ).*?(?=</font>)").Match(otv).ToString();
             countPage = new Regex("(?<=1 из ).*?(?=])").Match(countPage).ToString();
+            if (countPage == "")
+                countPage = "1";
             int allPagesTovar = Convert.ToInt32(countPage);
             int pages = 0;
             do
@@ -454,7 +456,7 @@ namespace MotoPiter
             foreach (Match str in prices)
             {
                 string s = str.ToString();
-                s = s.Replace("р:&nbsp;", "").Replace("&nbsp;р.", "").Replace(" ", "");
+                s = s.Replace("р:&nbsp;", "").Replace("&nbsp;р.", "").Replace(" ", "");
                 s = s.Trim();
                 if (prices.Count == 1)
                     price = s;
