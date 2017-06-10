@@ -424,6 +424,7 @@ namespace MotoPiter
             string panelTovar = new Regex("(?<=id=\"description\")[\\w\\W]*?(?=</div>)").Match(otv).ToString();
             panelTovar = panelTovar.Replace("<p></p>", "");
             string descriptionTovar = new Regex("(?<=<p>)[\\w\\W]*?(?=</p>)").Match(panelTovar).ToString();
+            descriptionTovar = descriptionTovar.Replace("\r\n", "");
             descriptionTovar = DeleteUrlsInText(descriptionTovar);
 
             string minDescription = "";
