@@ -448,7 +448,7 @@ namespace MotoPiter
             {
                 string s = articles[i].ToString();
                 s = s.Trim();
-                s = s.Replace("/", "_").Replace("-", "_").Replace(" ", "_");
+                s = s.Replace("/", "_").Replace("-", "_").Replace(" ", "_").Replace(".", "_").Replace(",", "_");
                 if (articles.Count == 1)
                     article = "MP_" + s;
                 else
@@ -457,6 +457,8 @@ namespace MotoPiter
 
             string price = "";
             MatchCollection prices = new Regex("(?<=<p><small>).*(?=</small></p>)").Matches(otv);
+            if(prices.Count == 0)
+                prices = new Regex("(?<=<p class=\"text-danger\"><s>).*?(?=</s>)").Matches(otv);
             foreach (Match str in prices)
             {
                 string s = str.ToString();
@@ -558,6 +560,8 @@ namespace MotoPiter
                 categoryName = "Звезды";
             else if(categories[maxLength - 1].ToString().Contains("Цепи") || categories[maxLength - 1].ToString().Contains("Замки Цепи"))
                 categoryName = "Цепи приводные";
+            else if (categories[maxLength - 1].ToString().Contains("АКБ") || categories[maxLength - 1].ToString().Contains("Зарядные устройства"))
+                categoryName = "Аккумуляторы";
             else
                 categoryName = categories[1].ToString();
 
