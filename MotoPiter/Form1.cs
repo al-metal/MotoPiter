@@ -247,6 +247,7 @@ namespace MotoPiter
 
             #endregion
 
+            ControlsFormEnabledTrue();
         }
 
         private void UploadCSVInNethoise(CookieContainer cookieNethouse)
@@ -659,6 +660,22 @@ namespace MotoPiter
             tbPassMotopiter.Invoke(new Action(() => tbPassMotopiter.Enabled = false));
         }
 
+        private void ControlsFormEnabledTrue()
+        {
+            btnActual.Invoke(new Action(() => btnActual.Enabled = true));
+            btnImages.Invoke(new Action(() => btnImages.Enabled = true));
+            btnSaveTemplate.Invoke(new Action(() => btnSaveTemplate.Enabled = true));
+            rtbFullText.Invoke(new Action(() => rtbFullText.Enabled = true));
+            rtbMiniText.Invoke(new Action(() => rtbMiniText.Enabled = true));
+            tbDescription.Invoke(new Action(() => tbDescription.Enabled = true));
+            tbKeywords.Invoke(new Action(() => tbKeywords.Enabled = true));
+            tbTitle.Invoke(new Action(() => tbTitle.Enabled = true));
+            tbLoginNethouse.Invoke(new Action(() => tbLoginNethouse.Enabled = true));
+            tbPassNethouse.Invoke(new Action(() => tbPassNethouse.Enabled = true));
+            tbLoginMotopiter.Invoke(new Action(() => tbLoginMotopiter.Enabled = true));
+            tbPassMotopiter.Invoke(new Action(() => tbPassMotopiter.Enabled = true));
+        }
+
         private string MinitextStr()
         {
             string minitext = "";
@@ -691,6 +708,65 @@ namespace MotoPiter
                 }
             }
             return fullText;
+        }
+
+        private void btnImages_Click(object sender, EventArgs e)
+        {
+            #region Сохранение паролей
+            Properties.Settings.Default.loginNethouse = tbLoginNethouse.Text;
+            Properties.Settings.Default.passNethouse = tbPassNethouse.Text;
+            Properties.Settings.Default.loginMotopiter = tbLoginMotopiter.Text;
+            Properties.Settings.Default.passMotopiter = tbPassMotopiter.Text;
+            Properties.Settings.Default.Save();
+            #endregion
+
+            #region Обработка картинок
+
+            Thread tabl = new Thread(() => ActualImages());
+            forms = tabl;
+            forms.IsBackground = true;
+            forms.Start();
+
+            #endregion
+        }
+
+        private void ActualImages()
+        {
+            CookieContainer cookieNethouse = nethouse.CookieNethouse(tbLoginNethouse.Text, tbPassNethouse.Text);
+            if (cookieNethouse.Count == 1)
+            {
+                MessageBox.Show("Логин или пароль для сайта Nethouse введены не верно", "Ошибка логина/пароля");
+                return;
+            }
+
+            ControlsFormEnabledFalse();
+
+            ImagesRashodniki(cookieNethouse);
+        }
+
+        private void ImagesRashodniki(CookieContainer cookieNethouse)
+        {
+            string otvImg = "";
+            otvImg = webRequest.getRequest("https://bike18.ru/products/category/rashodniki-dlya-yaponskih-evropeyskih-amerikanskih-motociklov");
+            MatchCollection razdel = new Regex("(?<=<div class=\"category-capt-txt -text-center\"><a href=\").*?(?=\" class=\"blue\">)").Matches(otvImg);
+            for(int i = 0; razdel.Count > i; i++)
+            {
+                string urlRzdel = "https://bike18.ru" + razdel[i].ToString() + "?page=all";
+                otvImg = webRequest.getRequest(urlRzdel);
+                MatchCollection product = new Regex("(?<=<a href=\").*(?=\"><div class=\"-relative item-image\")").Matches(otvImg);
+                for(int n = 0; product.Count > n; n++)
+                {
+                    string urlTovar = product[n].ToString();
+                    UploadImages(cookieNethouse, urlTovar);
+                }
+            }
+        }
+
+        private void UploadImages(CookieContainer cookieNethouse, string urlTovar)
+        {
+            urlTovar = urlTovar.Replace("bike18.ru", "bike18.nethouse.ru");
+
+            List<string> listProduct = nethouse.GetProductList(cookieNethouse, urlTovar);
         }
     }
 }

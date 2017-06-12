@@ -153,6 +153,7 @@
             this.btnImages.TabIndex = 10;
             this.btnImages.Text = "Обработать картинки";
             this.btnImages.UseVisualStyleBackColor = true;
+            this.btnImages.Click += new System.EventHandler(this.btnImages_Click);
             // 
             // btnSaveTemplate
             // 
