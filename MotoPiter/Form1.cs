@@ -216,11 +216,11 @@ namespace MotoPiter
             ControlsFormEnabledFalse();
 
             #region Моторасходники
-            otv = webRequest.getRequest(cookieMotoPiter, "http://www.motopiter.ru/dealer/dealer.asp");
+            string otvRashodnik = webRequest.getRequest(cookieMotoPiter, "http://www.motopiter.ru/dealer/dealer.asp");
 
-            otv = webRequest.getRequest(cookieMotoPiter, "http://www.motopiter.ru/product/6");
+            otvRashodnik = webRequest.getRequest(cookieMotoPiter, "http://www.motopiter.ru/product/6");
 
-            MatchCollection category = new Regex("(?<=<li class=\"submenu\"><a href=\"/product/6/).*?(?=</a>)").Matches(otv);
+            MatchCollection category = new Regex("(?<=<li class=\"submenu\"><a href=\"/product/6/).*?(?=</a>)").Matches(otvRashodnik);
 
             foreach (Match categoryStr in category)
             {
@@ -231,7 +231,7 @@ namespace MotoPiter
                 if (subCategoryUrl == "750" || subCategoryUrl == "470" || subCategoryUrl == "40")
                     continue;
 
-                MatchCollection subCategory = new Regex("(?<=href=\"/product/6/" + subCategoryUrl + "/).*?(?=</a>)").Matches(otv);
+                MatchCollection subCategory = new Regex("(?<=href=\"/product/6/" + subCategoryUrl + "/).*?(?=</a>)").Matches(otvRashodnik);
                 
                 foreach (Match subCategoryStr in subCategory)
                 {
@@ -422,12 +422,12 @@ namespace MotoPiter
 
             otv = webRequest.getRequest(cookieMotoPiter, urlTovar);
 
-            string nameTovar = new Regex("(?<=<h4>).*?(?=</h4><dl)").Match(otv).ToString();
+            string nameTovar = new Regex("(?<=<h4>).*?(?=</h4><dl)").Match(otv).ToString().Trim();
 
             string panelTovar = new Regex("(?<=id=\"description\")[\\w\\W]*?(?=</div>)").Match(otv).ToString();
             panelTovar = panelTovar.Replace("<p></p>", "");
             string descriptionTovar = new Regex("(?<=<p>)[\\w\\W]*?(?=</p>)").Match(panelTovar).ToString();
-            descriptionTovar = descriptionTovar.Replace("\r\n", "").Replace(";", "");
+            descriptionTovar = descriptionTovar.Replace("\r\n", "").Replace(";", "").Replace("\"", "\"\"");
             descriptionTovar = DeleteUrlsInText(descriptionTovar);
 
             string minDescription = "";
@@ -562,6 +562,10 @@ namespace MotoPiter
                 categoryName = "Цепи приводные";
             else if (categories[maxLength - 1].ToString().Contains("АКБ") || categories[maxLength - 1].ToString().Contains("Зарядные устройства"))
                 categoryName = "Аккумуляторы";
+            else if (categories[maxLength - 1].ToString().Contains("Колодки") || categories[maxLength - 1].ToString().Contains("Расширительные бачки") || categories[maxLength - 1].ToString().Contains("Суппорт"))
+                categoryName = "Тормозные колодки";
+            else if (categories[maxLength - 1].ToString().Contains("Сцепление") || categories[maxLength - 1].ToString().Contains("Пружины сцепления") || categories[maxLength - 1].ToString().Contains("Прокладки"))
+                categoryName = "Сцепление";
             else
                 categoryName = categories[1].ToString();
 
