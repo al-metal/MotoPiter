@@ -427,7 +427,7 @@ namespace MotoPiter
             string panelTovar = new Regex("(?<=id=\"description\")[\\w\\W]*?(?=</div>)").Match(otv).ToString();
             panelTovar = panelTovar.Replace("<p></p>", "");
             string descriptionTovar = new Regex("(?<=<p>)[\\w\\W]*?(?=</p>)").Match(panelTovar).ToString();
-            descriptionTovar = descriptionTovar.Replace("\r\n", "");
+            descriptionTovar = descriptionTovar.Replace("\r\n", "").Replace(";", "");
             descriptionTovar = DeleteUrlsInText(descriptionTovar);
 
             string minDescription = "";
@@ -457,8 +457,8 @@ namespace MotoPiter
 
             string price = "";
             MatchCollection prices = new Regex("(?<=<p><small>).*(?=</small></p>)").Matches(otv);
-            if(prices.Count == 0)
-                prices = new Regex("(?<=<p class=\"text-danger\"><s>).*?(?=</s>)").Matches(otv);
+            if (prices.Count == 0)
+                prices = new Regex("(?<=<del>).*(?=</del>)").Matches(otv);
             foreach (Match str in prices)
             {
                 string s = str.ToString();
