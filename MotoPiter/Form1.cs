@@ -231,8 +231,8 @@ namespace MotoPiter
                 if (subCategoryUrl == "750" || subCategoryUrl == "470" || subCategoryUrl == "40")
                     continue;
 
-                MatchCollection subCategory = new Regex("(?<=<a class=\"nolink small\" href=\"/product/6/" + subCategoryUrl + "/).*?(?=</a>)").Matches(otv);
-
+                MatchCollection subCategory = new Regex("(?<=href=\"/product/6/" + subCategoryUrl + "/).*?(?=</a>)").Matches(otv);
+                
                 foreach (Match subCategoryStr in subCategory)
                 {
                     string subStr = subCategoryStr.ToString();
@@ -254,6 +254,9 @@ namespace MotoPiter
             string[] naSite1 = File.ReadAllLines("naSite.csv", Encoding.GetEncoding(1251));
             if (naSite1.Length > 1)
                 nethouse.UploadCSVNethouse(cookieNethouse, "naSite.csv");
+
+            File.Delete("naSite.csv");
+            newProduct = newList();
         }
 
         private void UpdateTovars(CookieContainer cookieNethouse, CookieContainer cookieMotoPiter, string url, string group, string smallGroup)
@@ -550,6 +553,14 @@ namespace MotoPiter
             string categoriesStr = new Regex("(?<=breadcrumb).*?(?=<ul class=\"pager\">)").Match(otv).ToString();
             MatchCollection categories = new Regex("(?<=\">).*?(?=</a>)").Matches(categoriesStr);
             string categoryName = categories[1].ToString();
+            int maxLength = categories.Count;
+            if(categories[maxLength - 1].ToString().Contains("Звезды"))
+                categoryName = "Звезды";
+            else if(categories[maxLength - 1].ToString().Contains("Цепи") || categories[maxLength - 1].ToString().Contains("Замки Цепи"))
+                categoryName = "Цепи приводные";
+            else
+                categoryName = categories[1].ToString();
+
             category = "Запчасти и расходники => Расходники для японских, европейских, американских мотоциклов => " + categoryName;
 
             return category;
