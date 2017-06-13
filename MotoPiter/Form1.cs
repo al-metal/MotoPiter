@@ -424,6 +424,10 @@ namespace MotoPiter
             otv = webRequest.getRequest(cookieMotoPiter, urlTovar);
 
             string nameTovar = new Regex("(?<=<h4>).*?(?=</h4><dl)").Match(otv).ToString().Trim();
+            if(nameTovar == "Звезда задняя (ведомая) для мотоцикла JTR1871")
+            {
+
+            }
 
             string panelTovar = new Regex("(?<=id=\"description\")[\\w\\W]*?(?=</div>)").Match(otv).ToString();
             panelTovar = panelTovar.Replace("<p></p>", "");
@@ -742,6 +746,8 @@ namespace MotoPiter
             ControlsFormEnabledFalse();
 
             ImagesRashodniki(cookieNethouse);
+
+            ControlsFormEnabledTrue();
         }
 
         private void ImagesRashodniki(CookieContainer cookieNethouse)
@@ -767,6 +773,40 @@ namespace MotoPiter
             urlTovar = urlTovar.Replace("bike18.ru", "bike18.nethouse.ru");
 
             List<string> listProduct = nethouse.GetProductList(cookieNethouse, urlTovar);
+            string article = listProduct[6];
+            string images = listProduct[32];
+            string alsoby = listProduct[42];
+            string productGroupe = listProduct[3];
+            bool b = false;
+
+            if (article.Contains("MP_"))
+            {
+                if (images == "")
+                {
+                    if (File.Exists("pic\\" + article + ".jpg"))
+                    {
+                        nethouse.UploadImage(cookieNethouse, urlTovar);
+                        b = true;
+                    }
+                }
+
+                if (alsoby == "&alsoBuy[0]=als")
+                {
+                    listProduct[42] = nethouse.alsoBuyTovars(listProduct);
+                    b = true;
+                }
+
+                if (productGroupe != "10833347")
+                {
+                    listProduct[3] = "10833347";
+                    b = true;
+                }
+
+                if (b)
+                    nethouse.SaveTovar(cookieNethouse, listProduct);
+            }
+
+            
         }
     }
 }
