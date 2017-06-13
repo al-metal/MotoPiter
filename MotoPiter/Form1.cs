@@ -778,8 +778,17 @@ namespace MotoPiter
             string alsoby = listProduct[42];
             string productGroupe = listProduct[3];
             bool b = false;
+            bool delete = false;
 
             if (article.Contains("MP_"))
+            {
+                if(article.Contains(" ") || article.Contains("."))
+                {
+                    delete = true;
+                }
+            }
+
+                if (article.Contains("MP_"))
             {
                 if (images == "")
                 {
@@ -802,8 +811,11 @@ namespace MotoPiter
                     b = true;
                 }
 
-                if (b)
+                if (b && !delete)
                     nethouse.SaveTovar(cookieNethouse, listProduct);
+
+                if (delete)
+                    nethouse.DeleteProduct(cookieNethouse, urlTovar);
             }
 
             
