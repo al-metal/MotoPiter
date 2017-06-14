@@ -232,7 +232,7 @@ namespace MotoPiter
                     continue;
 
                 MatchCollection subCategory = new Regex("(?<=href=\"/product/6/" + subCategoryUrl + "/).*?(?=</a>)").Matches(otvRashodnik);
-                
+
                 foreach (Match subCategoryStr in subCategory)
                 {
                     string subStr = subCategoryStr.ToString();
@@ -240,7 +240,39 @@ namespace MotoPiter
                     string subCategorySmallUrl = new Regex(".*?(?=\" title=\")").Match(subStr).ToString();
                     string url = "http://www.motopiter.ru/product/6/" + subCategoryUrl + "/" + subCategorySmallUrl;
 
-                    UpdateTovars(cookieNethouse, cookieMotoPiter, url, subCategoryUrl, subCategorySmallUrl);
+                    // UpdateTovars(cookieNethouse, cookieMotoPiter, url, subCategoryUrl, subCategorySmallUrl, upCategoryRashodnik);
+                }
+                UploadCSVInNethoise(cookieNethouse);
+            }
+
+            #endregion
+
+            #region Мотозапчасти
+            otvRashodnik = webRequest.getRequest(cookieMotoPiter, "http://www.motopiter.ru/dealer/dealer.asp");
+
+            otvRashodnik = webRequest.getRequest(cookieMotoPiter, "http://www.motopiter.ru/product/3");
+
+            category = new Regex("(?<=<li class=\"submenu\"><a href=\"/product/3/).*?(?=</a>)").Matches(otvRashodnik);
+
+            foreach (Match categoryStr in category)
+            {
+                string str = categoryStr.ToString();
+                string subCategoryName = new Regex("(?<=\">).*").Match(str).ToString();
+                string subCategoryUrl = new Regex(".*(?=\">)").Match(str).ToString();
+
+                if (subCategoryUrl == "750" || subCategoryUrl == "470" || subCategoryUrl == "40")
+                    continue;
+
+                MatchCollection subCategory = new Regex("(?<=href=\"/product/3/" + subCategoryUrl + "/).*?(?=</a>)").Matches(otvRashodnik);
+
+                foreach (Match subCategoryStr in subCategory)
+                {
+                    string subStr = subCategoryStr.ToString();
+                    string subCategorySmallName = new Regex("(?<=\" title=\").*?(?=\">)").Match(subStr).ToString();
+                    string subCategorySmallUrl = new Regex(".*?(?=\" title=\")").Match(subStr).ToString();
+                    string url = "http://www.motopiter.ru/product/3/" + subCategoryUrl + "/" + subCategorySmallUrl;
+
+                    UpdateTovars(cookieNethouse, cookieMotoPiter, url, subCategoryUrl, subCategorySmallUrl, upCategoryZapchast);
                 }
                 UploadCSVInNethoise(cookieNethouse);
             }
@@ -260,7 +292,7 @@ namespace MotoPiter
             newProduct = newList();
         }
 
-        private void UpdateTovars(CookieContainer cookieNethouse, CookieContainer cookieMotoPiter, string url, string group, string smallGroup)
+        private void UpdateTovars(CookieContainer cookieNethouse, CookieContainer cookieMotoPiter, string url, string group, string smallGroup, string upCategory)
         {
             otv = null;
             otv = webRequest.getRequest(cookieMotoPiter, url);
@@ -273,9 +305,9 @@ namespace MotoPiter
             do
             {
                 pages++;
-                if(pages != 1)
+                if (pages != 1)
                 {
-                    string stringQuery = "GGroup=" + upCategoryRashodnik + "&SGroup=" + group + "&wgr=" + smallGroup + "&contentID=Short&new_sort=Price&new_step=&PageNo=" + pages + "&KShow=0&firma=0&transp=0";
+                    string stringQuery = "GGroup=" + upCategory + "&SGroup=" + group + "&wgr=" + smallGroup + "&contentID=Short&new_sort=Price&new_step=&PageNo=" + pages + "&KShow=0&firma=0&transp=0";
                     otv = webRequest.getRequest(cookieMotoPiter, url, stringQuery); // сделать запрос
                 }
 
@@ -286,10 +318,10 @@ namespace MotoPiter
                     string urlTovar = new Regex("(?<=<a href=\").*?(?=\")").Match(strTovarBox).ToString();
                     urlTovar = "http://www.motopiter.ru" + urlTovar;
 
-                    List<string> tovarMotoPiter = GetTovarMotoPiter(cookieMotoPiter, urlTovar);
+                    List<string> tovarMotoPiter = GetTovarMotoPiter(cookieMotoPiter, urlTovar, upCategory);
 
                     string resultSearch = SearchInBike18(tovarMotoPiter);
-                    if (resultSearch == null)
+                    if (resultSearch == null || resultSearch == "")
                     {
                         WriteTovarInCSV(tovarMotoPiter);
                     }
@@ -413,7 +445,7 @@ namespace MotoPiter
             return urlTovar;
         }
 
-        private List<string> GetTovarMotoPiter(CookieContainer cookieMotoPiter, string urlTovar)
+        private List<string> GetTovarMotoPiter(CookieContainer cookieMotoPiter, string urlTovar, string upCategory)
         {
             List<string> tovar = new List<string>();
             otv = null;
@@ -421,10 +453,7 @@ namespace MotoPiter
             otv = webRequest.getRequest(cookieMotoPiter, urlTovar);
 
             string nameTovar = new Regex("(?<=<h4>).*?(?=</h4><dl)").Match(otv).ToString().Trim();
-            if(nameTovar == "Звезда задняя (ведомая) для мотоцикла JTR1871")
-            {
-
-            }
+            nameTovar = nameTovar.Replace("\"", "");
 
             string panelTovar = new Regex("(?<=id=\"description\")[\\w\\W]*?(?=</div>)").Match(otv).ToString();
             panelTovar = panelTovar.Replace("<p></p>", "");
@@ -489,7 +518,7 @@ namespace MotoPiter
             descriptionText = ReplaceSEO("description", descriptionText, nameTovar, article);
             keywordsText = ReplaceSEO("keywords", keywordsText, nameTovar, article);
 
-            string categoryTovar = ReturnCategoryTovar(otv);
+            string categoryTovar = ReturnCategoryTovar(otv, upCategory);
 
             string miniText = minitextTemplate;
             string fullText = fullTextTemplate;
@@ -550,7 +579,7 @@ namespace MotoPiter
             return text;
         }
 
-        private string ReturnCategoryTovar(string otv)
+        private string ReturnCategoryTovar(string otv, string upCategory)
         {
             string category = "";
 
@@ -558,9 +587,9 @@ namespace MotoPiter
             MatchCollection categories = new Regex("(?<=\">).*?(?=</a>)").Matches(categoriesStr);
             string categoryName = categories[1].ToString();
             int maxLength = categories.Count;
-            if(categories[maxLength - 1].ToString().Contains("Звезды"))
+            if (categories[maxLength - 1].ToString().Contains("Звезды"))
                 categoryName = "Звезды";
-            else if(categories[maxLength - 1].ToString().Contains("Цепи") || categories[maxLength - 1].ToString().Contains("Замки Цепи"))
+            else if (categories[maxLength - 1].ToString().Contains("Цепи") || categories[maxLength - 1].ToString().Contains("Замки Цепи"))
                 categoryName = "Цепи приводные";
             else if (categories[maxLength - 1].ToString().Contains("АКБ") || categories[maxLength - 1].ToString().Contains("Зарядные устройства"))
                 categoryName = "Аккумуляторы";
@@ -568,10 +597,15 @@ namespace MotoPiter
                 categoryName = "Тормозные колодки";
             else if (categories[maxLength - 1].ToString().Contains("Сцепление") || categories[maxLength - 1].ToString().Contains("Пружины сцепления") || categories[maxLength - 1].ToString().Contains("Прокладки"))
                 categoryName = "Сцепление";
+            else if (categories[maxLength - 1].ToString().Contains("Ручки") || categories[maxLength - 1].ToString().Contains("Аксессуары"))
+                categoryName = "Управление-руль, ручки, рычаги, педали и прочее";
             else
                 categoryName = categories[1].ToString();
 
-            category = "Запчасти и расходники => Расходники для японских, европейских, американских мотоциклов => " + categoryName;
+            if (upCategory == "3")
+                category = "Запчасти и расходники => Запчасти для японских, европейских, американских мотоциклов => " + categoryName;
+            else
+                category = "Запчасти и расходники => Расходники для японских, европейских, американских мотоциклов => " + categoryName;
 
             return category;
         }
@@ -752,12 +786,12 @@ namespace MotoPiter
             string otvImg = "";
             otvImg = webRequest.getRequest("https://bike18.ru/products/category/rashodniki-dlya-yaponskih-evropeyskih-amerikanskih-motociklov");
             MatchCollection razdel = new Regex("(?<=<div class=\"category-capt-txt -text-center\"><a href=\").*?(?=\" class=\"blue\">)").Matches(otvImg);
-            for(int i = 0; razdel.Count > i; i++)
+            for (int i = 0; razdel.Count > i; i++)
             {
                 string urlRzdel = "https://bike18.ru" + razdel[i].ToString() + "?page=all";
                 otvImg = webRequest.getRequest(urlRzdel);
                 MatchCollection product = new Regex("(?<=<a href=\").*(?=\"><div class=\"-relative item-image\")").Matches(otvImg);
-                for(int n = 0; product.Count > n; n++)
+                for (int n = 0; product.Count > n; n++)
                 {
                     string urlTovar = product[n].ToString();
                     UploadImages(cookieNethouse, urlTovar);
@@ -779,13 +813,13 @@ namespace MotoPiter
 
             if (article.Contains("MP_"))
             {
-                if(article.Contains(" ") || article.Contains("."))
+                if (article.Contains(" ") || article.Contains("."))
                 {
                     delete = true;
                 }
             }
 
-                if (article.Contains("MP_"))
+            if (article.Contains("MP_"))
             {
                 if (images == "")
                 {
@@ -815,7 +849,7 @@ namespace MotoPiter
                     nethouse.DeleteProduct(cookieNethouse, urlTovar);
             }
 
-            
+
         }
     }
 }
