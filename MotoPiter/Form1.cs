@@ -285,7 +285,6 @@ namespace MotoPiter
                     string strTovarBox = str.ToString();
                     string urlTovar = new Regex("(?<=<a href=\").*?(?=\")").Match(strTovarBox).ToString();
                     urlTovar = "http://www.motopiter.ru" + urlTovar;
-                    //urlTovar = "http://www.motopiter.ru/20935235/A/HH62-120";
 
                     List<string> tovarMotoPiter = GetTovarMotoPiter(cookieMotoPiter, urlTovar);
 
@@ -396,8 +395,6 @@ namespace MotoPiter
             string nameTovar = tovarMotoPiter[0].ToString();
             string articles = tovarMotoPiter[1].ToString();
             string[] article = articles.Split(';');
-
-            urlTovar = nethouse.searchTovar(nameTovar, nameTovar);
 
             foreach (string str in article)
             {
