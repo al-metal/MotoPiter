@@ -240,7 +240,7 @@ namespace MotoPiter
                     string subCategorySmallUrl = new Regex(".*?(?=\" title=\")").Match(subStr).ToString();
                     string url = "http://www.motopiter.ru/product/6/" + subCategoryUrl + "/" + subCategorySmallUrl;
 
-                    // UpdateTovars(cookieNethouse, cookieMotoPiter, url, subCategoryUrl, subCategorySmallUrl, upCategoryRashodnik);
+                    UpdateTovars(cookieNethouse, cookieMotoPiter, url, subCategoryUrl, subCategorySmallUrl, upCategoryRashodnik);
                 }
                 UploadCSVInNethoise(cookieNethouse);
             }
@@ -453,7 +453,7 @@ namespace MotoPiter
             otv = webRequest.getRequest(cookieMotoPiter, urlTovar);
 
             string nameTovar = new Regex("(?<=<h4>)[\\w\\W]*(?=</h4><dl)").Match(otv).ToString().Trim();
-            nameTovar = nameTovar.Replace("\"", "").Replace("  ", " ").Replace("\r\n", " ");            
+            nameTovar = nameTovar.Replace("\"", "").Replace("  ", " ").Replace("\r\n", " ");
 
             string panelTovar = new Regex("(?<=id=\"description\")[\\w\\W]*?(?=</div>)").Match(otv).ToString();
             panelTovar = panelTovar.Replace("<p></p>", "");
@@ -608,7 +608,7 @@ namespace MotoPiter
             else if (categories[maxLength - 1].ToString().Contains("Поворотники") || categories[maxLength - 1].ToString().Contains("Резисторы, адаптеры, реле"))
                 categoryName = "Световые приборы";
             else if (categories[maxLength - 1].ToString().Contains("Фары") || categories[maxLength - 1].ToString().Contains("Крепление фары") || categories[maxLength - 1].ToString().Contains("Стоп-сигналы") || categories[maxLength - 1].ToString().Contains("Фары и стопсигналы"))
-                categoryName = "Световые приборы"; 
+                categoryName = "Световые приборы";
             else if (categories[maxLength - 1].ToString().Contains("Розетки и кнопки") || categories[maxLength - 1].ToString().Contains("Реле Регуляторы") || categories[maxLength - 1].ToString().Contains("Стартер") || categories[maxLength - 1].ToString().Contains("Пульты, домики") || categories[maxLength - 1].ToString().Contains("Ремкоплекты") || categories[maxLength - 1].ToString().Contains("Катушки зажигания") || categories[maxLength - 1].ToString().Contains("Звуковой сигнал") || categories[maxLength - 1].ToString().Contains("Приборы и датчики") || categories[maxLength - 1].ToString().Contains("Замки зажигания") || categories[maxLength - 1].ToString().Contains("Статоры"))
                 categoryName = "Электрика";
             else if (categories[maxLength - 1].ToString().Contains("Трос") || categories[maxLength - 1].ToString().Contains("Регулировочные штуцеры") || categories[maxLength - 1].ToString().Contains("Ремкомплект тросика"))
@@ -798,15 +798,17 @@ namespace MotoPiter
 
             ControlsFormEnabledFalse();
 
-            ImagesRashodniki(cookieNethouse);
+           // ImagesUpload(cookieNethouse, "https://bike18.ru/products/category/rashodniki-dlya-yaponskih-evropeyskih-amerikanskih-motociklov");
+
+            ImagesUpload(cookieNethouse, "https://bike18.ru/products/category/zapchasti-dlya-yaponskih-evropeyskih-amerikanskih-motociklov");
 
             ControlsFormEnabledTrue();
         }
 
-        private void ImagesRashodniki(CookieContainer cookieNethouse)
+        private void ImagesUpload(CookieContainer cookieNethouse, string url)
         {
             string otvImg = "";
-            otvImg = webRequest.getRequest("https://bike18.ru/products/category/rashodniki-dlya-yaponskih-evropeyskih-amerikanskih-motociklov");
+            otvImg = webRequest.getRequest(url);
             MatchCollection razdel = new Regex("(?<=<div class=\"category-capt-txt -text-center\"><a href=\").*?(?=\" class=\"blue\">)").Matches(otvImg);
             for (int i = 0; razdel.Count > i; i++)
             {
