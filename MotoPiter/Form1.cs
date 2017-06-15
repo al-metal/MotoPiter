@@ -810,7 +810,7 @@ namespace MotoPiter
             string otvImg = "";
             otvImg = webRequest.getRequest(url);
             MatchCollection razdel = new Regex("(?<=<div class=\"category-capt-txt -text-center\"><a href=\").*?(?=\" class=\"blue\">)").Matches(otvImg);
-            for (int i = 0; razdel.Count > i; i++)
+            for (int i = 6; razdel.Count > i; i++)
             {
                 string urlRzdel = "https://bike18.ru" + razdel[i].ToString() + "?page=all";
                 otvImg = webRequest.getRequest(urlRzdel);
@@ -829,7 +829,8 @@ namespace MotoPiter
 
             List<string> listProduct = nethouse.GetProductList(cookieNethouse, urlTovar);
             string article = listProduct[6];
-            string images = listProduct[32];
+            string images = listProduct[44];
+
             string alsoby = listProduct[42];
             string productGroupe = listProduct[3];
             bool b = false;
@@ -839,19 +840,23 @@ namespace MotoPiter
             {
                 if (article.Contains(" ") || article.Contains("."))
                 {
-                    delete = true;
+                    //delete = true;
                 }
             }
 
             if (article.Contains("MP_"))
             {
-                if (images == "")
+                if (images == ";")
                 {
                     if (File.Exists("pic\\" + article + ".jpg"))
                     {
                         nethouse.UploadImage(cookieNethouse, urlTovar);
                         b = true;
                     }
+                }
+                else
+                {
+
                 }
 
                 if (alsoby == "&alsoBuy[0]=als")
