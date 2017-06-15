@@ -260,7 +260,7 @@ namespace MotoPiter
                 string subCategoryName = new Regex("(?<=\">).*").Match(str).ToString();
                 string subCategoryUrl = new Regex(".*(?=\">)").Match(str).ToString();
 
-                if (subCategoryUrl == "750" || subCategoryUrl == "470" || subCategoryUrl == "40")
+                if (subCategoryUrl == "750" || subCategoryUrl == "470" || subCategoryUrl == "40" || subCategoryUrl == "33")
                     continue;
 
                 MatchCollection subCategory = new Regex("(?<=href=\"/product/3/" + subCategoryUrl + "/).*?(?=</a>)").Matches(otvRashodnik);
@@ -431,7 +431,7 @@ namespace MotoPiter
             foreach (string str in article)
             {
                 string search = "";
-                if (urlTovar == null)
+                if (urlTovar == "" || urlTovar == null)
                 {
                     search = nethouse.searchTovar(nameTovar, str);
                     if (search != null)
@@ -452,8 +452,8 @@ namespace MotoPiter
 
             otv = webRequest.getRequest(cookieMotoPiter, urlTovar);
 
-            string nameTovar = new Regex("(?<=<h4>).*?(?=</h4><dl)").Match(otv).ToString().Trim();
-            nameTovar = nameTovar.Replace("\"", "");
+            string nameTovar = new Regex("(?<=<h4>)[\\w\\W]*(?=</h4><dl)").Match(otv).ToString().Trim();
+            nameTovar = nameTovar.Replace("\"", "").Replace("  ", " ").Replace("\r\n", " ");            
 
             string panelTovar = new Regex("(?<=id=\"description\")[\\w\\W]*?(?=</div>)").Match(otv).ToString();
             panelTovar = panelTovar.Replace("<p></p>", "");
@@ -599,6 +599,28 @@ namespace MotoPiter
                 categoryName = "Сцепление";
             else if (categories[maxLength - 1].ToString().Contains("Ручки") || categories[maxLength - 1].ToString().Contains("Аксессуары"))
                 categoryName = "Управление-руль, ручки, рычаги, педали и прочее";
+            else if (categories[maxLength - 1].ToString().Contains("Подножки") || categories[maxLength - 1].ToString().Contains("Лапки переключения передач") || categories[maxLength - 1].ToString().Contains("Лапки тормоза"))
+                categoryName = "Подножки и платформы";
+            else if (categories[maxLength - 1].ToString().Contains("Рычаги") || categories[maxLength - 1].ToString().Contains("Переключатели (лягушки)") || categories[maxLength - 1].ToString().Contains("Чехлы на ручки"))
+                categoryName = "Управление-руль, ручки, рычаги, педали и прочее";
+            else if (categories[maxLength - 1].ToString().Contains("Зеркала") || categories[maxLength - 1].ToString().Contains("Адаптеры зеркал"))
+                categoryName = "Зеркала";
+            else if (categories[maxLength - 1].ToString().Contains("Поворотники") || categories[maxLength - 1].ToString().Contains("Резисторы, адаптеры, реле"))
+                categoryName = "Световые приборы";
+            else if (categories[maxLength - 1].ToString().Contains("Фары") || categories[maxLength - 1].ToString().Contains("Крепление фары") || categories[maxLength - 1].ToString().Contains("Стоп-сигналы") || categories[maxLength - 1].ToString().Contains("Фары и стопсигналы"))
+                categoryName = "Световые приборы"; 
+            else if (categories[maxLength - 1].ToString().Contains("Розетки и кнопки") || categories[maxLength - 1].ToString().Contains("Реле Регуляторы") || categories[maxLength - 1].ToString().Contains("Стартер") || categories[maxLength - 1].ToString().Contains("Пульты, домики") || categories[maxLength - 1].ToString().Contains("Ремкоплекты") || categories[maxLength - 1].ToString().Contains("Катушки зажигания") || categories[maxLength - 1].ToString().Contains("Звуковой сигнал") || categories[maxLength - 1].ToString().Contains("Приборы и датчики") || categories[maxLength - 1].ToString().Contains("Замки зажигания") || categories[maxLength - 1].ToString().Contains("Статоры"))
+                categoryName = "Электрика";
+            else if (categories[maxLength - 1].ToString().Contains("Трос") || categories[maxLength - 1].ToString().Contains("Регулировочные штуцеры") || categories[maxLength - 1].ToString().Contains("Ремкомплект тросика"))
+                categoryName = "Тросики";
+            else if (categories[maxLength - 1].ToString().Contains("Спортивная") || categories[maxLength - 1].ToString().Contains("Дорожная") || categories[maxLength - 1].ToString().Contains("Эндуро\\Кросс") || categories[maxLength - 1].ToString().Contains("Камера") || categories[maxLength - 1].ToString().Contains("Ремкомплекты"))
+                categoryName = "Моторезина";
+            else if (categories[maxLength - 1].ToString().Contains("Рули") || categories[maxLength - 1].ToString().Contains("Грузики руля") || categories[maxLength - 1].ToString().Contains("Стойки руля") || categories[maxLength - 1].ToString().Contains("Защитные накладки"))
+                categoryName = "Управление-руль, ручки, рычаги, педали и прочее";
+            else if (categories[maxLength - 1].ToString().Contains("Подшипники рулевой колонки") || categories[maxLength - 1].ToString().Contains("Подшипники колеса"))
+                categoryName = "Подшипники";
+            else if (categories[maxLength - 1].ToString().Contains("Болты") || categories[maxLength - 1].ToString().Contains("Морды") || categories[maxLength - 1].ToString().Contains("Крылья") || categories[maxLength - 1].ToString().Contains("Хвосты") || categories[maxLength - 1].ToString().Contains("Ветровые стекла") || categories[maxLength - 1].ToString().Contains("Боковины") || categories[maxLength - 1].ToString().Contains("Пауки") || categories[maxLength - 1].ToString().Contains("Разное"))
+                categoryName = "Пластик";
             else
                 categoryName = categories[1].ToString();
 
