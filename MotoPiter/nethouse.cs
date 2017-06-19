@@ -44,10 +44,16 @@ namespace Bike18
             if (otv != null)
             {
                 string productId = new Regex("(?<=<section class=\"comment\" id=\").*?(?=\">)").Match(otv).ToString();
-                string article = new Regex("(?<=Артикул:)[\\w\\W]*?(?=</div>)").Match(otv).Value.Trim();
-                if (article.Length > 20)
+                String article = new Regex("(?<=Артикул:)[\\w\\W]*?(?=</div>)").Match(otv).Value.Trim();
+                if (article.Length > 128 || article.Contains(" "))
                 {
-                    article = new Regex("(?<=Артикул:)[\\w\\W]*(?=</title>)").Match(otv).ToString().Trim();
+                    MatchCollection articles = new Regex("(?<=Артикул:)[\\w\\W]*?(?=</div>)").Matches(otv);
+                    if(articles.Count >= 2)
+                    article = articles[1].ToString().Trim();
+                    else
+                    {
+
+                    }
                 }
                 string prodName = new Regex("(?<=<h1>).*(?=</h1>)").Match(otv).Value;
                 string price = new Regex("(?<=<span class=\"product-price-data\" data-cost=\").*?(?=\">)").Match(otv).Value;
@@ -417,12 +423,22 @@ namespace Bike18
             urlProduct = urlProduct.Replace("http://bike18.ru", "http://bike18.nethouse.ru");
 
             otv = webRequest.PostRequest(cookieBike18, urlProduct);
-            string artProd = new Regex("(?<=Артикул:)[\\w\\W]*?(?=</title><)").Match(otv).ToString().Trim();
+            String article = new Regex("(?<=Артикул:)[\\w\\W]*?(?=</div>)").Match(otv).Value.Trim();
+            if (article.Length > 128 || article.Contains(" "))
+            {
+                MatchCollection articles = new Regex("(?<=Артикул:)[\\w\\W]*?(?=</div>)").Matches(otv);
+                if (articles.Count >= 2)
+                    article = articles[1].ToString().Trim();
+                else
+                {
+
+                }
+            }
 
             MatchCollection prId = new Regex("(?<=data-id=\").*?(?=\")").Matches(otv);
             string productId = prId[0].ToString();
 
-            Image newImg = Image.FromFile("Pic\\" + artProd + ".jpg");
+            Image newImg = Image.FromFile("Pic\\" + article + ".jpg");
             double widthImg = newImg.Width;
             double heigthImg = newImg.Height;
 
@@ -451,8 +467,8 @@ namespace Bike18
             req.ContentType = "multipart/form-data; boundary=----WebKitFormBoundaryDxXeyjY3R0nRHgrP";
             req.CookieContainer = cookieBike18;
             req.Headers.Add("X-Requested-With", "XMLHttpRequest");
-            byte[] pic = File.ReadAllBytes("Pic\\" + artProd + ".jpg");
-            byte[] end = Encoding.ASCII.GetBytes("\r\n------WebKitFormBoundaryDxXeyjY3R0nRHgrP\r\nContent-Disposition: form-data; name=\"_file\"\r\n\r\n" + artProd + ".jpg\r\n------WebKitFormBoundaryDxXeyjY3R0nRHgrP--\r\n");
+            byte[] pic = File.ReadAllBytes("Pic\\" + article + ".jpg");
+            byte[] end = Encoding.ASCII.GetBytes("\r\n------WebKitFormBoundaryDxXeyjY3R0nRHgrP\r\nContent-Disposition: form-data; name=\"_file\"\r\n\r\n" + article + ".jpg\r\n------WebKitFormBoundaryDxXeyjY3R0nRHgrP--\r\n");
             byte[] ms1 = Encoding.ASCII.GetBytes("------WebKitFormBoundaryDxXeyjY3R0nRHgrP\r\nContent-Disposition: form-data; name=\"file\"; filename=\"4680329013422.jpg\"\r\nContent-Type: image/jpeg\r\n\r\n");
             req.ContentLength = ms1.Length + pic.Length + end.Length;
             Stream stre1 = req.GetRequestStream();
