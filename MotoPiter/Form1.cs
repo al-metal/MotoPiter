@@ -327,11 +327,50 @@ namespace MotoPiter
                     }
                     else
                     {
-                        //обновить цену
+                        string[] allUrls = resultSearch.Split(';');
+                        foreach (string urlSearch in allUrls)
+                        {
+                            if (urlSearch != "")
+                                UpdatePrice(cookieNethouse, urlSearch, tovarMotoPiter);
+                        }
                     }
                 }
 
             } while (pages < allPagesTovar);
+        }
+
+        private void UpdatePrice(CookieContainer cookieNethouse, string urlSearch, List<string> tovarMotoPiter)
+        {
+            List<string> tovarB18 = nethouse.GetProductList(cookieNethouse, urlSearch);
+            string priceB18 = tovarB18[9];
+
+            string priceMP = "";
+
+            string[] artiles = tovarMotoPiter[1].Split(';');
+            string[] prices = tovarMotoPiter[2].Split(';');
+
+            if (artiles.Length > 2)
+            {
+                for(int i = 0; artiles.Length > i; i++)
+                {
+                    if(artiles[i] == tovarB18[6])
+                    {
+                        priceMP = prices[i].ToString();
+                    }
+                }
+            }
+            else
+            {
+                priceMP = tovarMotoPiter[2];
+            }
+
+
+
+            if (priceB18 != priceMP)
+            {
+                tovarB18[9] = priceMP;
+                nethouse.SaveTovar(cookieNethouse, tovarB18);
+            }
         }
 
         private List<string> newList()
@@ -798,7 +837,7 @@ namespace MotoPiter
 
             ControlsFormEnabledFalse();
 
-           // ImagesUpload(cookieNethouse, "https://bike18.ru/products/category/rashodniki-dlya-yaponskih-evropeyskih-amerikanskih-motociklov");
+            ImagesUpload(cookieNethouse, "https://bike18.ru/products/category/rashodniki-dlya-yaponskih-evropeyskih-amerikanskih-motociklov");
 
             ImagesUpload(cookieNethouse, "https://bike18.ru/products/category/zapchasti-dlya-yaponskih-evropeyskih-amerikanskih-motociklov");
 
@@ -810,7 +849,7 @@ namespace MotoPiter
             string otvImg = "";
             otvImg = webRequest.getRequest(url);
             MatchCollection razdel = new Regex("(?<=<div class=\"category-capt-txt -text-center\"><a href=\").*?(?=\" class=\"blue\">)").Matches(otvImg);
-            for (int i = 6; razdel.Count > i; i++)
+            for (int i = 0; razdel.Count > i; i++)
             {
                 string urlRzdel = "https://bike18.ru" + razdel[i].ToString() + "?page=all";
                 otvImg = webRequest.getRequest(urlRzdel);
