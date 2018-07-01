@@ -1,19 +1,15 @@
-﻿using Bike18;
+﻿using NehouseLibrary;
 using RacerMotors;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
 using System.IO;
-using System.Linq;
 using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using Формирование_ЧПУ;
+using xNet.Net;
 
 namespace MotoPiter
 {
@@ -35,7 +31,6 @@ namespace MotoPiter
         List<string> newProduct = new List<string>();
 
         nethouse nethouse = new nethouse();
-        httpRequest webRequest = new httpRequest();
         CHPU chpu = new CHPU();
         FileEdit files = new FileEdit();
         WebClient webClient = new WebClient();
@@ -198,14 +193,14 @@ namespace MotoPiter
 
         private void ActualMotoPiter()
         {
-            CookieContainer cookieNethouse = nethouse.CookieNethouse(tbLoginNethouse.Text, tbPassNethouse.Text);
+            CookieDictionary cookieNethouse = nethouse.CookieNethouse(tbLoginNethouse.Text, tbPassNethouse.Text);
             if (cookieNethouse.Count == 1)
             {
                 MessageBox.Show("Логин или пароль для сайта Nethouse введены не верно", "Ошибка логина/пароля");
                 return;
             }
 
-            CookieContainer cookieMotoPiter = CookieMotoPiter(tbLoginMotopiter.Text, tbPassMotopiter.Text);
+            CookieDictionary cookieMotoPiter = CookieMotoPiter(tbLoginMotopiter.Text, tbPassMotopiter.Text);
             if (cookieMotoPiter.Count != 1)
             {
                 MessageBox.Show("Логин или пароль для сайта MotoPiter введены не верно", "Ошибка логина/пароля");
@@ -216,9 +211,9 @@ namespace MotoPiter
             ControlsFormEnabledFalse();
 
             #region Моторасходники
-            string otvRashodnik = webRequest.getRequest(cookieMotoPiter, "http://www.motopiter.ru/dealer/dealer.asp");
+            string otvRashodnik = nethouse.getRequestEncodingUTF8(cookieMotoPiter, "http://www.motopiter.ru/dealer/dealer.asp");
 
-            otvRashodnik = webRequest.getRequest(cookieMotoPiter, "http://www.motopiter.ru/product/6");
+            otvRashodnik = nethouse.getRequestEncodingUTF8(cookieMotoPiter, "http://www.motopiter.ru/product/6");
 
             MatchCollection category = new Regex("(?<=<li class=\"submenu\"><a href=\"/product/6/).*?(?=</a>)").Matches(otvRashodnik);
 
@@ -248,9 +243,9 @@ namespace MotoPiter
             #endregion
 
             #region Мотозапчасти
-            otvRashodnik = webRequest.getRequest(cookieMotoPiter, "http://www.motopiter.ru/dealer/dealer.asp");
+            otvRashodnik = nethouse.getRequest(cookieMotoPiter, "http://www.motopiter.ru/dealer/dealer.asp");
 
-            otvRashodnik = webRequest.getRequest(cookieMotoPiter, "http://www.motopiter.ru/product/3");
+            otvRashodnik = nethouse.getRequest(cookieMotoPiter, "http://www.motopiter.ru/product/3");
 
             category = new Regex("(?<=<li class=\"submenu\"><a href=\"/product/3/).*?(?=</a>)").Matches(otvRashodnik);
 
@@ -278,24 +273,26 @@ namespace MotoPiter
             }
 
             #endregion
+            
+            MessageBox.Show("Файл с новыми товарами находится в папке с программой", "Работа завершена", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
             ControlsFormEnabledTrue();
         }
 
-        private void UploadCSVInNethoise(CookieContainer cookieNethouse)
+        private void UploadCSVInNethoise(CookieDictionary cookieNethouse)
         {
-            string[] naSite1 = File.ReadAllLines("naSite.csv", Encoding.GetEncoding(1251));
-            if (naSite1.Length > 1)
-                nethouse.UploadCSVNethouse(cookieNethouse, "naSite.csv");
+            //string[] naSite1 = File.ReadAllLines("naSite.csv", Encoding.GetEncoding(1251));
+            //if (naSite1.Length > 1)
+            //    nethouse.UploadCSVNethouse(cookieNethouse, "naSite.csv", tbLoginNethouse.Text, tbPassNethouse.Text);
 
-            File.Delete("naSite.csv");
-            newProduct = newList();
+            //File.Delete("naSite.csv");
+            //newProduct = newList();
         }
 
-        private void UpdateTovars(CookieContainer cookieNethouse, CookieContainer cookieMotoPiter, string url, string group, string smallGroup, string upCategory)
+        private void UpdateTovars(CookieDictionary cookieNethouse, CookieDictionary cookieMotoPiter, string url, string group, string smallGroup, string upCategory)
         {
             otv = null;
-            otv = webRequest.getRequest(cookieMotoPiter, url);
+            otv = nethouse.getRequestEncodingUTF8(cookieMotoPiter, url);
             string countPage = new Regex("(?<=Показана страница ).*?(?=</font>)").Match(otv).ToString();
             countPage = new Regex("(?<=1 из ).*?(?=])").Match(countPage).ToString();
             if (countPage == "")
@@ -308,7 +305,7 @@ namespace MotoPiter
                 if (pages != 1)
                 {
                     string stringQuery = "GGroup=" + upCategory + "&SGroup=" + group + "&wgr=" + smallGroup + "&contentID=Short&new_sort=Price&new_step=&PageNo=" + pages + "&KShow=0&firma=0&transp=0";
-                    otv = webRequest.getRequest(cookieMotoPiter, url, stringQuery); // сделать запрос
+                    otv = nethouse.PostRequest(cookieMotoPiter, url, stringQuery); // сделать запрос
                 }
 
                 MatchCollection tovarBox = new Regex("(?<=<div class=\"box_grey\")[\\w\\W]*?(?=</div></div></a></div>)").Matches(otv);
@@ -319,6 +316,9 @@ namespace MotoPiter
                     urlTovar = "http://www.motopiter.ru" + urlTovar;
 
                     List<string> tovarMotoPiter = GetTovarMotoPiter(cookieMotoPiter, urlTovar, upCategory);
+
+                    if (tovarMotoPiter == null)
+                        continue;
 
                     string resultSearch = SearchInBike18(tovarMotoPiter);
                     if (resultSearch == null || resultSearch == "")
@@ -339,9 +339,12 @@ namespace MotoPiter
             } while (pages < allPagesTovar);
         }
 
-        private void UpdatePrice(CookieContainer cookieNethouse, string urlSearch, List<string> tovarMotoPiter)
+        private void UpdatePrice(CookieDictionary cookieNethouse, string urlSearch, List<string> tovarMotoPiter)
         {
             List<string> tovarB18 = nethouse.GetProductList(cookieNethouse, urlSearch);
+            if (tovarB18 == null)
+                return;
+
             string priceB18 = tovarB18[9];
 
             string priceMP = "";
@@ -351,9 +354,9 @@ namespace MotoPiter
 
             if (artiles.Length > 2)
             {
-                for(int i = 0; artiles.Length > i; i++)
+                for (int i = 0; artiles.Length > i; i++)
                 {
-                    if(artiles[i] == tovarB18[6])
+                    if (artiles[i] == tovarB18[6])
                     {
                         priceMP = prices[i].ToString();
                     }
@@ -424,7 +427,7 @@ namespace MotoPiter
                     string minitext = miniDescriptions[i];
                     string slug = slugs[i];
 
-                    if (article == "")
+                    if (article == "" || price == "0")
                         continue;
 
                     minitext = "<p>" + minitext + "</p>" + minitextTemplate;
@@ -469,30 +472,43 @@ namespace MotoPiter
 
             foreach (string str in article)
             {
-                string search = "";
-                if (urlTovar == "" || urlTovar == null)
+                if(str == "")
                 {
+                    continue;
+                }
+                string search = "";
+                //if (urlTovar == "" || urlTovar == null)
+                //{
                     search = nethouse.searchTovar(nameTovar, str);
                     if (search != null)
                     {
                         urlTovar = urlTovar + ";" + search;
                     }
-                }
+                //}
 
             }
 
             return urlTovar;
         }
 
-        private List<string> GetTovarMotoPiter(CookieContainer cookieMotoPiter, string urlTovar, string upCategory)
+        private List<string> GetTovarMotoPiter(CookieDictionary cookieMotoPiter, string urlTovar, string upCategory)
         {
             List<string> tovar = new List<string>();
             otv = null;
 
-            otv = webRequest.getRequest(cookieMotoPiter, urlTovar);
+            otv = nethouse.getRequestEncodingUTF8(cookieMotoPiter, urlTovar);
+            if(otv == "err")
+            {
+                return null;
+            }
 
             string nameTovar = new Regex("(?<=<h4>)[\\w\\W]*(?=</h4><dl)").Match(otv).ToString().Trim();
             nameTovar = nameTovar.Replace("\"", "").Replace("  ", " ").Replace("\r\n", " ");
+
+            if(nameTovar == "Звезда задняя (ведомая) JTR1876 для мотоцикла стальная")
+            {
+
+            }
 
             string panelTovar = new Regex("(?<=id=\"description\")[\\w\\W]*?(?=</div>)").Match(otv).ToString();
             panelTovar = panelTovar.Replace("<p></p>", "");
@@ -529,6 +545,13 @@ namespace MotoPiter
             MatchCollection prices = new Regex("(?<=<p><small>).*(?=</small></p>)").Matches(otv);
             if (prices.Count == 0)
                 prices = new Regex("(?<=<del>).*(?=</del>)").Matches(otv);
+            else
+            if (prices[0].ToString().Length >50 )
+            {
+                prices = new Regex("(?<=<p><small>).*?(?=</small></p>)").Matches(otv);
+            }
+            //MatchCollection prices = new Regex("(?<=<h4><strong>).*?(?=р.</strong></h4>)").Matches(otv);
+           
             foreach (Match str in prices)
             {
                 string s = str.ToString();
@@ -721,7 +744,7 @@ namespace MotoPiter
             return text;
         }
 
-        private CookieContainer CookieMotoPiter(string login, string password)
+        private CookieDictionary CookieMotoPiter(string login, string password)
         {
             CookieContainer cookie = new CookieContainer();
             HttpWebRequest req = (HttpWebRequest)HttpWebRequest.Create("http://www.motopiter.ru/run");
@@ -737,7 +760,13 @@ namespace MotoPiter
             stre.Close();
             HttpWebResponse res = (HttpWebResponse)req.GetResponse();
 
-            return cookie;
+            CookieDictionary cookieDict = new CookieDictionary();
+            foreach (Cookie cookie2 in cookie.GetCookies(new Uri("http://www.motopiter.ru/run")))
+{
+                cookieDict.Add(cookie2.Name, cookie2.Value);
+            }
+
+            return cookieDict;
         }
 
         private void ControlsFormEnabledFalse()
@@ -828,7 +857,7 @@ namespace MotoPiter
 
         private void ActualImages()
         {
-            CookieContainer cookieNethouse = nethouse.CookieNethouse(tbLoginNethouse.Text, tbPassNethouse.Text);
+            CookieDictionary cookieNethouse = nethouse.CookieNethouse(tbLoginNethouse.Text, tbPassNethouse.Text);
             if (cookieNethouse.Count == 1)
             {
                 MessageBox.Show("Логин или пароль для сайта Nethouse введены не верно", "Ошибка логина/пароля");
@@ -844,15 +873,15 @@ namespace MotoPiter
             ControlsFormEnabledTrue();
         }
 
-        private void ImagesUpload(CookieContainer cookieNethouse, string url)
+        private void ImagesUpload(CookieDictionary cookieNethouse, string url)
         {
             string otvImg = "";
-            otvImg = webRequest.getRequest(url);
+            otvImg = nethouse.getRequest(url);
             MatchCollection razdel = new Regex("(?<=<div class=\"category-capt-txt -text-center\"><a href=\").*?(?=\" class=\"blue\">)").Matches(otvImg);
             for (int i = 0; razdel.Count > i; i++)
             {
                 string urlRzdel = "https://bike18.ru" + razdel[i].ToString() + "?page=all";
-                otvImg = webRequest.getRequest(urlRzdel);
+                otvImg = nethouse.getRequest(urlRzdel);
                 MatchCollection product = new Regex("(?<=<a href=\").*(?=\"><div class=\"-relative item-image\")").Matches(otvImg);
                 for (int n = 0; product.Count > n; n++)
                 {
@@ -862,7 +891,7 @@ namespace MotoPiter
             }
         }
 
-        private void UploadImages(CookieContainer cookieNethouse, string urlTovar)
+        private void UploadImages(CookieDictionary cookieNethouse, string urlTovar)
         {
             urlTovar = urlTovar.Replace("bike18.ru", "bike18.nethouse.ru");
 
